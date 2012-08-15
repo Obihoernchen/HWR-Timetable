@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Grundeinstellungen" >
+        <EditTextPreference
+            android:key="@string/prefs_matrikelNrKey"
+            android:title="@string/text_prefs_matrikelNr_title" />
+
+        <ListPreference
+            android:entries="@array/prefs_entries_fachrichtung"
+            android:entryValues="@array/prefs_entries_values_fachrichtung"
+            android:key="@string/prefs_fachrichtungKey"
+            android:summary="@string/text_prefs_fachrichtung_summary"
+            android:title="@string/text_prefs_fachrichtung_title" >
+        </ListPreference>
+        <ListPreference
+            android:entries="@array/prefs_entries_semester"
+            android:entryValues="@array/prefs_entries_values_semester"
+            android:key="@string/prefs_semesterKey"
+            android:summary="@string/text_prefs_semster_summary"
+            android:title="@string/text_prefs_semester_title" >
+        </ListPreference>
+        <ListPreference
+            android:entries="@array/prefs_entries_kurs"
+            android:entryValues="@array/prefs_entries_values_kurs"
+            android:key="@string/prefs_kursKey"
+            android:summary="@string/text_prefs_kurs_summary"
+            android:title="@string/text_prefs_kurs_title" >
+        </ListPreference>
+
+        <PreferenceScreen
+            android:enabled="false"
+            android:key="@string/prefs_lastUpdated"
+            android:selectable="false"
+            android:title="@string/text_prefs_lastUpdated" >
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/text_prefs_category_connections_title" >
+        <CheckBoxPreference
+            android:defaultValue="@bool/prefs_default_isProxy"
+            android:enabled="true"
+            android:key="@string/prefs_proxyFlagKey"
+            android:summary="@string/text_prefs_proxyFlag_summary"
+            android:title="@string/text_prefs_proxyFlag_title" >
+        </CheckBoxPreference>
+
+        <EditTextPreference
+            android:defaultValue="@string/prefs_default_proxy"
+            android:dependency="@string/prefs_proxyFlagKey"
+            android:key="@string/prefs_proxyKey"
+            android:title="@string/text_prefs_proxy_title" >
+        </EditTextPreference>
+        <EditTextPreference
+            android:defaultValue="@string/prefs_default_proxy_port"
+            android:dependency="@string/prefs_proxyFlagKey"
+            android:key="@string/prefs_proxyPortKey"
+            android:title="@string/text_prefs_proxy_port_title" >
+        </EditTextPreference>
+    </PreferenceCategory>
+    <PreferenceCategory 
+        android:title="@string/text_prefs_category_calendar_title">
+        <CheckBoxPreference
+            android:defaultValue="@bool/prefs_default_cal_sync"
+            android:enabled="true"
+            android:key="@string/prefs_cal_sync_Key"
+            android:summary="@string/text_prefs_cal_sync_summary"
+            android:title="@string/text_prefs_cal_sync_title" >
+        </CheckBoxPreference>
+
+        <Preference
+            android:dependency="@string/prefs_cal_sync_Key"
+            android:key="@string/prefs_cal_Key"
+            android:title="@string/text_prefs_cal_title" >
+        </Preference>
+        
+        <Preference
+            android:dependency="@string/prefs_cal_sync_Key"
+            android:key="@string/prefs_cal_force_sync_Key"
+            android:title="@string/text_prefs_cal_force_sync_title" >
+        </Preference>
+
+        <Preference
+            android:key="@string/prefs_cal_export_Key"
+            android:title="@string/text_prefs_cal_export_title" >
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/text_prefs_category_others_title" >
+        <Preference
+            android:defaultValue="@string/prefs_default_showInPast"
+            android:key="@string/prefs_showInPastKey"
+            android:summary="@string/text_prefs_showInPast_summary"
+            android:title="@string/text_prefs_showInPast_title" >
+        </Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="prefs_entries_kurs">
+    	<item>Kurs</item>
+        <item>Kurs A</item>
+        <item>Kurs B</item>
+        <item>Kurs C</item>
+    </string-array>
+    <string-array name="prefs_entries_values_kurs">
+    	<item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="prefs_entries_fachrichtung">
+        <item>Bank</item>
+        <item>Bauwesen</item>
+        <item>Dienstleistungsmanagement</item>
+        <item>Elektrotechnik</item>
+        <item>Facility Management</item>
+        <item>Handel</item>
+        <item>IBA</item>
+        <item>Immobilienwirtschaft</item>
+        <item>Industrie</item>
+        <item>Informatik</item>
+        <item>Maschinenbau</item>
+        <item>Spedition/Logistik</item>
+        <item>Steuern/Prüfungswesen</item>
+        <item>Tourismusbetriebswirtschaft</item>
+        <item>Versicherung</item>
+        <item>Wirtschaftsinformatik</item>
+        <item>Externe Dozenten</item>
+        <item>Bereich Technik (Laborplan)</item>
+    </string-array>
+    <string-array name="prefs_entries_values_fachrichtung">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+    </string-array>
+    <string-array name="prefs_entries_semester">
+    	<item>Semester 1</item>
+    	<item>Semester 2</item>
+    	<item>Semester 3</item>
+    	<item>Semester 4</item>
+    	<item>Semester 5</item>
+    	<item>Semester 6</item>
+    </string-array>    
+    <string-array name="prefs_entries_values_semester">
+    	<item>1</item>
+    	<item>2</item>
+    	<item>3</item>
+    	<item>4</item>
+    	<item>5</item>
+    	<item>6</item>
+    </string-array>
+    <item type="bool" name="prefs_default_cal_sync" format="boolean">false</item>
+    <item type="bool" name="prefs_default_isProxy" format="boolean">false</item>
+    <string name="prefs_default_proxy">194.94.23.231</string>
+    <string name="prefs_default_proxy_port">80</string>
+    <item type="bool" name="prefs_default_notify" format="boolean">true</item>
+    <string name="prefs_default_showInPast">00:30</string>
+</resources>

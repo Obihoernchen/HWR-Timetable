@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/group_detail_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip" >
+
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:text="Kurs: " />
+
+        <TextView
+            android:id="@+id/text_subject_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/group_detail_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip" >
+
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:text="Art: " />
+
+        <TextView
+            android:id="@+id/text_subject_type"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/group_detail_lecturer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip" >
+
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:text="Dozent: " />
+
+        <TextView
+            android:id="@+id/text_subject_lecturer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/group_detail_room"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip" >
+
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:text="Raum: " />
+
+        <TextView
+            android:id="@+id/text_subject_room"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/group_detail_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip" >
+
+        <TextView
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:text="Zeitraum: " />
+
+        <TextView
+            android:id="@+id/text_subject_time"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/group_detail_list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dip"
+            android:paddingRight="5dip"
+            android:text="Termine: " />
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <ListView
+                android:id="@+id/list_subject_events"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black" >
+            </ListView>
+
+            <TextView
+                android:id="@+id/text_subject_events_empty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="@string/text_no_subjects_in_time" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

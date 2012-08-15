@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@id/menu_refresh"
+        android:icon="@drawable/ic_menu_refresh"
+        android:showAsAction="always"
+        android:title="@string/menu_refresh"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@id/menu_group"
+        android:icon="@drawable/ic_menu_menu"
+        android:showAsAction="always"
+        android:title="@string/menu_group"
+        android:visible="true">
+        <menu>
+            <item
+                android:id="@id/menu_selection"
+                android:showAsAction="always|withText"
+                android:title="@string/menu_selection"
+                android:visible="true"/>
+            <item
+                android:id="@id/menu_donate"
+                android:showAsAction="always|withText"
+                android:title="@string/menu_donate"
+                android:visible="true"/>
+            <item
+                android:id="@id/menu_license"
+                android:showAsAction="always|withText"
+                android:title="@string/menu_license"
+                android:visible="true"/>
+            <item
+                android:id="@id/menu_feedback"
+                android:showAsAction="always|withText"
+                android:title="@string/menu_feedback"
+                android:visible="true"/>
+            <item
+                android:id="@id/menu_settings"
+                android:showAsAction="always|withText"
+                android:title="@string/menu_settings"
+                android:visible="true"/>
+        </menu>
+    </item>
+
+</menu>

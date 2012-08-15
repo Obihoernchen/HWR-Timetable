@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="menu_refresh"/>
+    <item type="id" name="menu_settings"/>
+    <item type="id" name="menu_selection"/>
+    <item type="id" name="menu_group"/>
+    <item type="id" name="menu_feedback"/>
+    <item type="id" name="menu_license"/>
+    <item name="menu_donate" type="id"/>
+    
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TimetableTheme" parent="@style/Theme.Sherlock">
+        <item name="android:actionBarStyle">@style/ActionBarIPS</item>
+    </style>
+
+    <style name="IndeterminateProgress" parent="@style/Widget.Sherlock.ProgressBar">
+        <item name="android:indeterminateDrawable">@drawable/progress_small_holo</item>
+    </style>
+
+    <style name="ActionBarIPS" parent="@style/Widget.Sherlock.ActionBar">
+        <item name="android:indeterminateProgressStyle">@style/IndeterminateProgress</item>
+    </style>
+
+</resources>
