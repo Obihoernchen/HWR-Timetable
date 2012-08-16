@@ -121,10 +121,18 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			
 			ProgressDialog dialog;
 			List<Subjects> visibleSubjects = new ArrayList<Subjects>(); 
+			List<Subjects> allSubjects = new ArrayList<Subjects>();
 			
 			@Override
 			public void onNewItem(Subjects s, Events e) {
-				s.setShow(visibleSubjects.contains(s));				
+				if (!visibleSubjects.contains(s) && !allSubjects.contains(s)){
+					s.setShow(true);
+				}else if (visibleSubjects.contains(s)){
+					s.setShow(true);
+				}else{
+					s.setShow(false);
+				}
+							
 				application.onNewItem(s, e);
 			}
 
@@ -137,6 +145,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 								true, false);
 				
 				visibleSubjects = application.getVisibleSubjects();
+				allSubjects = application.getSubjects();
 				
 				application.removeAllData();
 				application.onLoadingStarted();
