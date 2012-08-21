@@ -16,6 +16,8 @@ public class Events {
     private String room;
     /** Not-null value. */
     private String lecturer;
+    /** Not-null value. */
+    private String type;
     private java.util.Date start;
     private long subjectId;
     private java.util.Date end;
@@ -37,11 +39,12 @@ public class Events {
         this.id = id;
     }
 
-    public Events(Long id, String uid, String room, String lecturer, java.util.Date start, long subjectId, java.util.Date end) {
+    public Events(Long id, String uid, String room, String lecturer, String type, java.util.Date start, long subjectId, java.util.Date end) {
         this.id = id;
         this.uid = uid;
         this.room = room;
         this.lecturer = lecturer;
+        this.type = type;
         this.start = start;
         this.subjectId = subjectId;
         this.end = end;
@@ -89,6 +92,16 @@ public class Events {
     /** Not-null value; ensure this value is available before it is saved to the database. */
     public void setLecturer(String lecturer) {
         this.lecturer = lecturer;
+    }
+
+    /** Not-null value. */
+    public String getType() {
+        return type;
+    }
+
+    /** Not-null value; ensure this value is available before it is saved to the database. */
+    public void setType(String type) {
+        this.type = type;
     }
 
     public java.util.Date getStart() {

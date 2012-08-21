@@ -15,8 +15,6 @@ public class Subjects {
     private String title;
     /** Not-null value. */
     private String shortTitle;
-    /** Not-null value. */
-    private String type;
     private Boolean show;
 
     /** Used to resolve relations */
@@ -34,11 +32,10 @@ public class Subjects {
         this.id = id;
     }
 
-    public Subjects(Long id, String title, String shortTitle, String type, Boolean show) {
+    public Subjects(Long id, String title, String shortTitle, Boolean show) {
         this.id = id;
         this.title = title;
         this.shortTitle = shortTitle;
-        this.type = type;
         this.show = show;
     }
 
@@ -74,16 +71,6 @@ public class Subjects {
     /** Not-null value; ensure this value is available before it is saved to the database. */
     public void setShortTitle(String shortTitle) {
         this.shortTitle = shortTitle;
-    }
-
-    /** Not-null value. */
-    public String getType() {
-        return type;
-    }
-
-    /** Not-null value; ensure this value is available before it is saved to the database. */
-    public void setType(String type) {
-        this.type = type;
     }
 
     public Boolean getShow() {
@@ -135,18 +122,18 @@ public class Subjects {
         myDao.refresh(this);
     }
     
- // KEEP METHODS - put your custom methods here
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof Subjects){
-			if (((Subjects) o).getTitle().equals(getTitle())){
-				return true;
-			}else{
-				return false;
-			}
-		}
-		
-		return false;
-	}
- // KEEP METHODS END
+    // KEEP METHODS - put your custom methods here
+   	@Override
+   	public boolean equals(Object o) {
+   		if (o instanceof Subjects){
+   			if (((Subjects) o).getTitle().equals(getTitle())){
+   				return true;
+   			}else{
+   				return false;
+   			}
+   		}
+   		
+   		return false;
+   	}
+    // KEEP METHODS END
 }

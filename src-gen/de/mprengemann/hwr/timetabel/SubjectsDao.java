@@ -26,8 +26,7 @@ public class SubjectsDao extends AbstractDao<Subjects, Long> {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Title = new Property(1, String.class, "title", false, "TITLE");
         public final static Property ShortTitle = new Property(2, String.class, "shortTitle", false, "SHORT_TITLE");
-        public final static Property Type = new Property(3, String.class, "type", false, "TYPE");
-        public final static Property Show = new Property(4, Boolean.class, "show", false, "SHOW");
+        public final static Property Show = new Property(3, Boolean.class, "show", false, "SHOW");
     };
 
     private DaoSession daoSession;
@@ -49,8 +48,7 @@ public class SubjectsDao extends AbstractDao<Subjects, Long> {
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'TITLE' TEXT NOT NULL UNIQUE ," + // 1: title
                 "'SHORT_TITLE' TEXT NOT NULL UNIQUE ," + // 2: shortTitle
-                "'TYPE' TEXT NOT NULL ," + // 3: type
-                "'SHOW' INTEGER);"); // 4: show
+                "'SHOW' INTEGER);"); // 3: show
     }
 
     /** Drops the underlying database table. */
@@ -70,11 +68,10 @@ public class SubjectsDao extends AbstractDao<Subjects, Long> {
         }
         stmt.bindString(2, entity.getTitle());
         stmt.bindString(3, entity.getShortTitle());
-        stmt.bindString(4, entity.getType());
  
         Boolean show = entity.getShow();
         if (show != null) {
-            stmt.bindLong(5, show ? 1l: 0l);
+            stmt.bindLong(4, show ? 1l: 0l);
         }
     }
 
@@ -97,8 +94,7 @@ public class SubjectsDao extends AbstractDao<Subjects, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.getString(offset + 1), // title
             cursor.getString(offset + 2), // shortTitle
-            cursor.getString(offset + 3), // type
-            cursor.isNull(offset + 4) ? null : cursor.getShort(offset + 4) != 0 // show
+            cursor.isNull(offset + 3) ? null : cursor.getShort(offset + 3) != 0 // show
         );
         return entity;
     }
@@ -109,8 +105,7 @@ public class SubjectsDao extends AbstractDao<Subjects, Long> {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setTitle(cursor.getString(offset + 1));
         entity.setShortTitle(cursor.getString(offset + 2));
-        entity.setType(cursor.getString(offset + 3));
-        entity.setShow(cursor.isNull(offset + 4) ? null : cursor.getShort(offset + 4) != 0);
+        entity.setShow(cursor.isNull(offset + 3) ? null : cursor.getShort(offset + 3) != 0);
      }
     
     /** @inheritdoc */

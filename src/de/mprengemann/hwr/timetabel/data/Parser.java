@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel.data;
 
 import java.io.IOException;
@@ -26,7 +41,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -41,9 +55,12 @@ import de.mprengemann.hwr.timetabel.icsparser.IcsParser.OnCalendarParsingListene
 public class Parser extends AsyncTask<Void, Void, Void> {
 
 	public interface OnLoadingListener {
-		void onLoadingStarted(String msg);
 		void onError(OnLoadingListener listener);
+
 		void onLoadingFinished(boolean hasError);
+
+		void onLoadingStarted(String msg);
+
 		void onNewItem(Subjects s, Events evt);
 	}
 
@@ -52,7 +69,6 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 
 	private Context context;
 	private boolean connectionAvail = true;
-	private ProgressDialog mLoadingDialog;
 	private SharedPreferences preferences;
 
 	public Parser(Context context, OnLoadingListener listener) {
@@ -62,14 +78,9 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 		this.listener = listener;
 	}
 
-	protected void onPreExecute() {
-		listener.onLoadingStarted("");
-	}
-
 	protected Void doInBackground(Void... params) {
 		if (Utils.connectionChecker(context)) {
 			try {
-
 				String matrikelnr = preferences.getString(
 						context.getString(R.string.prefs_matrikelNrKey), "");
 
@@ -95,6 +106,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 				if (entity != null) {
 					entity.consumeContent();
 				}
+
 				List<Cookie> cookies = httpclient.getCookieStore().getCookies();
 
 				HttpPost httpost = new HttpPost(
@@ -122,7 +134,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 
 				URL url;
 				InputStream is = null;
-
+				Log.i(TAG, cookies.toString());
 				try {
 					url = new URL(Utils.buildURL(context, preferences));
 					URLConnection c = url.openConnection();
@@ -130,7 +142,6 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 					c.setRequestProperty("Cookie", cookies.get(0).getName()
 							+ "=" + cookies.get(0).getValue());
 					c.connect();
-
 					is = c.getInputStream();
 
 					if (is != null) {
@@ -146,7 +157,8 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 										Subjects s = new Subjects();
 										s.setTitle(p.getProperty("SUMMARY")
 												.getValue());
-										s.setShortTitle(s.getTitle().substring(s.getTitle().indexOf("-") + 1));
+										s.setShortTitle(s.getTitle().substring(
+												s.getTitle().indexOf("-") + 1));
 										s.setShow(true);
 
 										SimpleDateFormat df = new SimpleDateFormat(
@@ -180,7 +192,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 														"Dozent: ", ""));
 												break;
 											} else if (desc.startsWith("Art: ")) {
-												s.setType(desc.replace("Art: ",
+												evt.setType(desc.replace("Art: ",
 														""));
 											}
 										}
@@ -192,25 +204,30 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 							});
 						} catch (Exception e) {
 							connectionAvail = false;
+							Log.e(TAG, e.toString());
 						}
 					} else {
 						connectionAvail = false;
 					}
-				} catch (MalformedURLException mue) {
+				} catch (MalformedURLException e) {
 					connectionAvail = false;
-				} catch (IOException ioe) {
+					Log.e(TAG, e.toString());
+				} catch (IOException e) {
 					connectionAvail = false;
+					Log.e(TAG, e.toString());
 				} finally {
 					try {
 						is.close();
-					} catch (IOException ioe) {
+					} catch (IOException e) {
 						connectionAvail = false;
+						Log.e(TAG, e.toString());
 					}
 				}
 
 				httpclient.getConnectionManager().shutdown();
 			} catch (Exception e) {
 				connectionAvail = false;
+				Log.e(TAG, e.toString());
 			}
 		}
 		return null;
@@ -222,5 +239,9 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 		} else {
 			listener.onLoadingFinished(!connectionAvail);
 		}
+	}
+
+	protected void onPreExecute() {
+		listener.onLoadingStarted("");
 	}
 }

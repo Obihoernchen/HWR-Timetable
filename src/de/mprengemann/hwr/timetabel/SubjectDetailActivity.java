@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel;
 
 import android.os.Bundle;
@@ -15,13 +30,15 @@ import de.mprengemann.hwr.timetabel.fragments.viewpager.SubjectDetailFragmentAda
 @EActivity
 public class SubjectDetailActivity extends SherlockFragmentActivity {
 
+	@SuppressWarnings("unused")
 	private static final String TAG = "SubjectDetailActivity";
+	
 	private TimetableApplication application;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		application = (TimetableApplication) getApplication();
 
 		long evt_id = 0;
@@ -35,6 +52,8 @@ public class SubjectDetailActivity extends SherlockFragmentActivity {
 
 		setContentView(R.layout.fragment_subject_detail_pager);
 
+		getSupportActionBar().setTitle(getString(R.string.menu_detail));
+
 		SubjectDetailFragmentAdapter mAdapter = new SubjectDetailFragmentAdapter(
 				(TimetableApplication) getApplication(), sub_id, evt_id,
 				getSupportFragmentManager());
@@ -45,10 +64,10 @@ public class SubjectDetailActivity extends SherlockFragmentActivity {
 		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator_subject);
 		indicator.setViewPager(mPager);
 		indicator.setFooterIndicatorStyle(IndicatorStyle.None);
-		
+
 		indicator.setCurrentItem(application.getSubjectPosition(sub_id));
 
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
+		getSupportActionBar().setDisplayShowTitleEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 

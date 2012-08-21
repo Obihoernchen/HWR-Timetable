@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel.data;
 
 import java.io.File;
@@ -25,7 +40,6 @@ import net.fortuna.ical4j.model.property.Version;
 import net.fortuna.ical4j.util.UidGenerator;
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -46,57 +60,14 @@ import de.mprengemann.hwr.timetabel.TimetableApplication_;
 
 public class CalendarUtils {
 
+	public interface CalendarExportListener {
+		void onFinish(String path);
+
+		void onStart();
+	}
+
 	public interface CalendarFetcherListener {
 		void newCalendar(GoogleCalendar cal);
-	}
-
-	public interface CalendarSyncListener {
-		void onStartRemoving();
-
-		void onFinishRemoving();
-
-		void onStartPublishing();
-
-		void onFinishPublishing();
-	}
-	
-	public interface CalendarExportListener {
-		void onStart();
-
-		void onFinish(String path);
-	}
-
-	public static void getGoogleCalendars(Context c,
-			CalendarFetcherListener listener) {
-		CalendarFetcherTask test = new CalendarFetcherTask(listener);
-		test.execute(c);
-	}
-
-	public static void getGoogleCalendar(Context c, long sel_id,
-			CalendarFetcherListener calendarFetcherListener) {
-		CalendarFetcherTask test = new CalendarFetcherTask(sel_id,
-				calendarFetcherListener);
-		test.execute(c);
-	}
-
-	public static void removeAllEvents(Context c, long id,
-			CalendarSyncListener listener) {
-		EventsRemoverTask test = new EventsRemoverTask(id, listener);
-		test.execute(c);
-	}
-
-	public static void syncTimetable(TimetableApplication_ application,
-			Context c, long id, CalendarSyncListener listener) {
-		removeAllEvents(c, id, listener);
-		TimetableWriterTask task = new TimetableWriterTask(application, id,
-				listener);
-		task.execute(c);
-	}
-
-	public static void exportICSCalendar(TimetableApplication_ application,
-			Context c, CalendarExportListener listener) {
-		TimetableExportTask task = new TimetableExportTask(application, listener);
-		task.execute(c);
 	}
 
 	@TargetApi(14)
@@ -196,6 +167,16 @@ public class CalendarUtils {
 		}
 	}
 
+	public interface CalendarSyncListener {
+		void onFinishPublishing();
+
+		void onFinishRemoving();
+
+		void onStartPublishing();
+
+		void onStartRemoving();
+	}
+
 	@TargetApi(14)
 	private static class EventsRemoverTask extends
 			AsyncTask<Context, Void, Void> {
@@ -216,24 +197,6 @@ public class CalendarUtils {
 		public EventsRemoverTask(long id, CalendarSyncListener listener) {
 			this.calId = id;
 			this.listener = listener;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-			if (listener != null) {
-				listener.onStartRemoving();
-			}
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-
-			if (listener != null) {
-				listener.onFinishRemoving();
-			}
 		}
 
 		@Override
@@ -260,28 +223,14 @@ public class CalendarUtils {
 
 			return null;
 		}
-	}
 
-	@TargetApi(14)
-	private static class TimetableWriterTask extends
-			AsyncTask<Context, Void, Void> {
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
 
-		@SuppressWarnings("unused")
-		private static final String TAG = "TimetableWriterTask";
-		private long calId = -1;
-		private TimetableApplication_ application;
-		private CalendarSyncListener listener;
-
-		@SuppressWarnings("unused")
-		public TimetableWriterTask(TimetableApplication_ application, long id) {
-			this(application, id, null);
-		}
-
-		public TimetableWriterTask(TimetableApplication_ application, long id,
-				CalendarSyncListener listener) {
-			this.calId = id;
-			this.application = application;
-			this.listener = listener;
+			if (listener != null) {
+				listener.onFinishRemoving();
+			}
 		}
 
 		@Override
@@ -289,41 +238,8 @@ public class CalendarUtils {
 			super.onPreExecute();
 
 			if (listener != null) {
-				listener.onStartPublishing();
+				listener.onStartRemoving();
 			}
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-
-			if (listener != null) {
-				listener.onFinishPublishing();
-			}
-		}
-
-		@Override
-		protected Void doInBackground(Context... params) {
-
-			ContentResolver cr = params[0].getContentResolver();
-			ContentValues values;
-
-			for (Subjects s : application.getVisibleSubjects()) {
-				for (de.mprengemann.hwr.timetabel.Events e : s.getEvents()) {
-					values = new ContentValues();
-					values.put(Events.DTSTART, e.getStart().getTime());
-					values.put(Events.DTEND, e.getEnd().getTime());
-					values.put(Events.TITLE, s.getTitle());
-					values.put(Events.DESCRIPTION, e.getLecturer());
-					values.put(Events.EVENT_LOCATION, e.getRoom());
-					values.put(Events.CALENDAR_ID, String.valueOf(calId));
-					values.put(Events.EVENT_TIMEZONE, TimeZone.getDefault()
-							.getDisplayName());
-					cr.insert(Events.CONTENT_URI, values);
-				}
-			}
-
-			return null;
 		}
 	}
 
@@ -341,19 +257,11 @@ public class CalendarUtils {
 		public TimetableExportTask(TimetableApplication_ application) {
 			this(application, null);
 		}
-		
-		public TimetableExportTask(TimetableApplication_ application, CalendarExportListener listener) {
+
+		public TimetableExportTask(TimetableApplication_ application,
+				CalendarExportListener listener) {
 			this.application = application;
 			this.listener = listener;
-		}
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			
-			if (listener != null){
-				listener.onStart();
-			}
 		}
 
 		@Override
@@ -391,7 +299,7 @@ public class CalendarUtils {
 								.add(new Description(
 										String.format(
 												"Art: %s\nVeranstaltung: %s\nDozent: %s\nRaum: %s",
-												s.getType(), s.getTitle(),
+												e.getType(), s.getTitle(),
 												e.getLecturer(), e.getRoom())));
 						evt.getProperties().add(ug.generateUid());
 						calendar.getComponents().add(evt);
@@ -435,9 +343,117 @@ public class CalendarUtils {
 		protected void onPostExecute(final String result) {
 			super.onPostExecute(result);
 
-			if (listener != null){
+			if (listener != null) {
 				listener.onFinish(result);
 			}
 		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+			if (listener != null) {
+				listener.onStart();
+			}
+		}
+	}
+
+	@TargetApi(14)
+	private static class TimetableWriterTask extends
+			AsyncTask<Context, Void, Void> {
+
+		@SuppressWarnings("unused")
+		private static final String TAG = "TimetableWriterTask";
+		private long calId = -1;
+		private TimetableApplication_ application;
+		private CalendarSyncListener listener;
+
+		@SuppressWarnings("unused")
+		public TimetableWriterTask(TimetableApplication_ application, long id) {
+			this(application, id, null);
+		}
+
+		public TimetableWriterTask(TimetableApplication_ application, long id,
+				CalendarSyncListener listener) {
+			this.calId = id;
+			this.application = application;
+			this.listener = listener;
+		}
+
+		@Override
+		protected Void doInBackground(Context... params) {
+
+			ContentResolver cr = params[0].getContentResolver();
+			ContentValues values;
+
+			for (Subjects s : application.getVisibleSubjects()) {
+				for (de.mprengemann.hwr.timetabel.Events e : s.getEvents()) {
+					values = new ContentValues();
+					values.put(Events.DTSTART, e.getStart().getTime());
+					values.put(Events.DTEND, e.getEnd().getTime());
+					values.put(Events.TITLE, s.getTitle());
+					values.put(Events.DESCRIPTION, e.getLecturer());
+					values.put(Events.EVENT_LOCATION, e.getRoom());
+					values.put(Events.CALENDAR_ID, String.valueOf(calId));
+					values.put(Events.EVENT_TIMEZONE, TimeZone.getDefault()
+							.getDisplayName());
+					cr.insert(Events.CONTENT_URI, values);
+				}
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+
+			if (listener != null) {
+				listener.onFinishPublishing();
+			}
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+			if (listener != null) {
+				listener.onStartPublishing();
+			}
+		}
+	}
+
+	public static void exportICSCalendar(TimetableApplication_ application,
+			Context c, CalendarExportListener listener) {
+		TimetableExportTask task = new TimetableExportTask(application,
+				listener);
+		task.execute(c);
+	}
+
+	public static void getGoogleCalendar(Context c, long sel_id,
+			CalendarFetcherListener calendarFetcherListener) {
+		CalendarFetcherTask test = new CalendarFetcherTask(sel_id,
+				calendarFetcherListener);
+		test.execute(c);
+	}
+
+	public static void getGoogleCalendars(Context c,
+			CalendarFetcherListener listener) {
+		CalendarFetcherTask test = new CalendarFetcherTask(listener);
+		test.execute(c);
+	}
+
+	public static void removeAllEvents(Context c, long id,
+			CalendarSyncListener listener) {
+		EventsRemoverTask test = new EventsRemoverTask(id, listener);
+		test.execute(c);
+	}
+
+	public static void syncTimetable(TimetableApplication_ application,
+			Context c, long id, CalendarSyncListener listener) {
+		removeAllEvents(c, id, listener);
+		TimetableWriterTask task = new TimetableWriterTask(application, id,
+				listener);
+		task.execute(c);
 	}
 }

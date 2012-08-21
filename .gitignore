@@ -1,7 +1,9 @@
-# built application files
+#Except all files in Releases-Folder
+!Publishing/Releases/*
 
-*.apk
+# built application files
 *.ap_
+*.db
 
 # files for the dex VM
 *.dex

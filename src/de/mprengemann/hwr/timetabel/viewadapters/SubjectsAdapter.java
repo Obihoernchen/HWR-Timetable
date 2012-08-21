@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel.viewadapters;
 
 import java.text.SimpleDateFormat;
@@ -23,38 +38,9 @@ public class SubjectsAdapter extends BaseAdapter {
 		void onDataChange(int size, String text);
 	}
 
-	private OnDataChangeListener listener;
-
-	public final static long SECOND_MILLIS = 1000;
-	public final static long MINUTE_MILLIS = SECOND_MILLIS * 60;
-	public final static long HOUR_MILLIS = MINUTE_MILLIS * 60;
-	public final static long DAY_MILLIS = HOUR_MILLIS * 24;
-	public final static long YEAR_MILLIS = DAY_MILLIS * 365;
-
-	private static final int TYPE_ITEM = 0;
-	private static final int TYPE_SEPARATOR = 1;
-	private static final int TYPE_MAX_COUNT = TYPE_SEPARATOR + 1;
-	private static final String TAG = "SubjectsAdapter";
-
-	private LayoutInflater mInflater;
-
-	private SimpleDateFormat df = new SimpleDateFormat("HH:mm");
-	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-
-	private HashMap<Integer, Events> mData = new HashMap<Integer, Events>();
-	private HashMap<Integer, String> mSeparatorsSet = new HashMap<Integer, String>();
-	private Context context;
-	private TimetableApplication app;
-
-	private boolean isLoading = false;
-
-	private long selection = 0;
-
 	public interface OnSelectionChangeListener {
 		void onSelected(long new_id);
 	}
-
-	private OnSelectionChangeListener selListener;
 
 	class ViewHolder {
 		TextView titleView;
@@ -62,35 +48,40 @@ public class SubjectsAdapter extends BaseAdapter {
 		TextView roomView;
 		TextView seperatorView;
 	}
+	private OnDataChangeListener listener;
+	public final static long SECOND_MILLIS = 1000;
+	public final static long MINUTE_MILLIS = SECOND_MILLIS * 60;
+	public final static long HOUR_MILLIS = MINUTE_MILLIS * 60;
+
+	public final static long DAY_MILLIS = HOUR_MILLIS * 24;
+	public final static long YEAR_MILLIS = DAY_MILLIS * 365;
+	private static final int TYPE_ITEM = 0;
+	private static final int TYPE_SEPARATOR = 1;
+
+	private static final int TYPE_MAX_COUNT = TYPE_SEPARATOR + 1;
+
+	private static final String TAG = "SubjectsAdapter";
+	private LayoutInflater mInflater;
+
+	private SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+	private HashMap<Integer, Events> mData = new HashMap<Integer, Events>();
+	private HashMap<Integer, String> mSeparatorsSet = new HashMap<Integer, String>();
+
+	private Context context;
+
+	private TimetableApplication app;
+
+	private boolean isLoading = false;
+
+	private long selection = 0;
+
+	private OnSelectionChangeListener selListener;
 
 	public SubjectsAdapter(Context context, TimetableApplication app) {
 		mInflater = LayoutInflater.from(context);
 		this.context = context;
 		this.app = app;
-	}
-
-	public void setOnDataChangeListener(OnDataChangeListener listener) {
-		this.listener = listener;
-	}
-
-	private void callListener() {
-		if (listener != null) {
-			listener.onDataChange(getCount(), getLoadingString());
-		}
-	}
-
-	private String getLoadingString() {
-		if (isLoading) {
-			return context.getString(R.string.text_please_wait);
-		} else if (app.getSubjectCount() == 0) {
-			return context.getString(R.string.text_no_subjects);
-		} else {
-			return context.getString(R.string.text_no_subjects_in_time);
-		}
-	}
-
-	public void setLoading(boolean b) {
-		isLoading = b;
 	}
 
 	public void addItem(final Events evt) {
@@ -106,15 +97,51 @@ public class SubjectsAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 
-	@Override
-	public int getItemViewType(int position) {
-		return mSeparatorsSet.containsKey(Integer.valueOf(position)) ? TYPE_SEPARATOR
-				: TYPE_ITEM;
+	private void callListener() {
+		if (listener != null) {
+			listener.onDataChange(getCount(), getLoadingString());
+		}
 	}
 
-	@Override
-	public int getViewTypeCount() {
-		return TYPE_MAX_COUNT;
+	public void clear() {
+		mData = new HashMap<Integer, Events>();
+		mSeparatorsSet = new HashMap<Integer, String>();
+
+		callListener();
+		notifyDataSetChanged();
+	}
+
+	private long daysDiff(final Calendar today, final Calendar nextSeperatorDate) {
+		Calendar date = (Calendar) today.clone();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+
+		Calendar next = (Calendar) nextSeperatorDate.clone();
+		next.set(Calendar.HOUR_OF_DAY, 0);
+		next.set(Calendar.MINUTE, 0);
+		next.set(Calendar.SECOND, 0);
+		next.set(Calendar.MILLISECOND, 0);
+
+		long daysBetween = 0;
+		int multi = 1;
+
+		if (!date.before(next)) {
+			if (date.compareTo(next) != 0) {
+				multi = -1;
+				Calendar temp = (Calendar) date.clone();
+				date = (Calendar) next.clone();
+				next = (Calendar) temp.clone();
+			}
+		}
+
+		while (date.before(next)) {
+			date.add(Calendar.DAY_OF_MONTH, 1);
+			daysBetween++;
+		}
+
+		return multi * daysBetween;
 	}
 
 	@Override
@@ -127,13 +154,41 @@ public class SubjectsAdapter extends BaseAdapter {
 		return mData.get(Integer.valueOf(position));
 	}
 
-	public String getSeperatorItem(int position) {
-		return mSeparatorsSet.get(Integer.valueOf(position));
-	}
-
 	@Override
 	public long getItemId(int position) {
 		return position;
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		return mSeparatorsSet.containsKey(Integer.valueOf(position)) ? TYPE_SEPARATOR
+				: TYPE_ITEM;
+	}
+
+	private String getLoadingString() {
+		if (isLoading) {
+			return context.getString(R.string.text_please_wait);
+		} else if (app.getSubjectCount() == 0) {
+			return context.getString(R.string.text_no_subjects);
+		} else {
+			return context.getString(R.string.text_no_subjects_in_time);
+		}
+	}
+
+	public int getSeparatorPosition(String item) {
+		if (mSeparatorsSet.containsValue(item)) {
+			for (Entry<Integer, String> set : mSeparatorsSet.entrySet()) {
+				if (set.getValue().equals(item)) {
+					return set.getKey();
+				}
+			}
+		}
+
+		return 1;
+	}
+
+	public String getSeperatorItem(int position) {
+		return mSeparatorsSet.get(Integer.valueOf(position));
 	}
 
 	@Override
@@ -144,7 +199,6 @@ public class SubjectsAdapter extends BaseAdapter {
 			holder = new ViewHolder();
 			switch (type) {
 			case TYPE_ITEM:
-
 				convertView = mInflater.inflate(R.layout.fragment_subject_item,
 						null);
 				holder.titleView = (TextView) convertView
@@ -182,12 +236,12 @@ public class SubjectsAdapter extends BaseAdapter {
 				if (selection == item.getId()) {
 					convertView
 							.setBackgroundResource(R.drawable.abs__list_activated_holo);
-					int padding = context.getResources().getDimensionPixelSize(R.dimen.default_list_padding);
+					int padding = context.getResources().getDimensionPixelSize(
+							R.dimen.default_list_padding);
 					convertView.setPadding(padding, padding, padding, padding);
 				} else {
 					convertView
 							.setBackgroundResource(android.R.color.transparent);
-
 				}
 
 				try {
@@ -233,24 +287,9 @@ public class SubjectsAdapter extends BaseAdapter {
 		return convertView;
 	}
 
-	public void clear() {
-		mData = new HashMap<Integer, Events>();
-		mSeparatorsSet = new HashMap<Integer, String>();
-
-		callListener();
-		notifyDataSetChanged();
-	}
-
-	public int getSeparatorPosition(String item) {
-		if (mSeparatorsSet.containsValue(item)) {
-			for (Entry<Integer, String> set : mSeparatorsSet.entrySet()) {
-				if (set.getValue().equals(item)) {
-					return set.getKey();
-				}
-			}
-		}
-
-		return 1;
+	@Override
+	public int getViewTypeCount() {
+		return TYPE_MAX_COUNT;
 	}
 
 	public void setItems(List<Events> events) {
@@ -276,37 +315,17 @@ public class SubjectsAdapter extends BaseAdapter {
 		callListener();
 	}
 
-	private long daysDiff(final Calendar today, final Calendar nextSeperatorDate) {
-		Calendar date = (Calendar) today.clone();
-		date.set(Calendar.HOUR_OF_DAY, 0);
-		date.set(Calendar.MINUTE, 0);
-		date.set(Calendar.SECOND, 0);
-		date.set(Calendar.MILLISECOND, 0);
+	public void setLoading(boolean b) {
+		isLoading = b;
+	}
 
-		Calendar next = (Calendar) nextSeperatorDate.clone();
-		next.set(Calendar.HOUR_OF_DAY, 0);
-		next.set(Calendar.MINUTE, 0);
-		next.set(Calendar.SECOND, 0);
-		next.set(Calendar.MILLISECOND, 0);
+	public void setOnDataChangeListener(OnDataChangeListener listener) {
+		this.listener = listener;
+	}
 
-		long daysBetween = 0;
-		int multi = 1;
-
-		if (!date.before(next)) {
-			if (date.compareTo(next) != 0) {
-				multi = -1;
-				Calendar temp = (Calendar) date.clone();
-				date = (Calendar) next.clone();
-				next = (Calendar) temp.clone();
-			}
-		}
-
-		while (date.before(next)) {
-			date.add(Calendar.DAY_OF_MONTH, 1);
-			daysBetween++;
-		}
-
-		return multi * daysBetween;
+	public void setOnSelectionChangeListener(
+			OnSelectionChangeListener onSelectionChangeListener) {
+		this.selListener = onSelectionChangeListener;
 	}
 
 	public void setSelection(Events mEvent) {
@@ -317,11 +336,6 @@ public class SubjectsAdapter extends BaseAdapter {
 			}
 			notifyDataSetChanged();
 		}
-	}
-
-	public void setOnSelectionChangeListener(
-			OnSelectionChangeListener onSelectionChangeListener) {
-		this.selListener = onSelectionChangeListener;
 	}
 
 }

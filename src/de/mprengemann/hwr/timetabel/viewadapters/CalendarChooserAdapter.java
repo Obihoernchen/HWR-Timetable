@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel.viewadapters;
 
 import java.util.ArrayList;
@@ -16,27 +31,37 @@ import de.mprengemann.hwr.timetabel.data.GoogleCalendar;
 
 public class CalendarChooserAdapter extends BaseAdapter {
 
-	private static final String TAG = "SubjectChooserAdapter";
-
 	public interface OnCalendarSelectedListener {
 		void onCalendarSelected(GoogleCalendar cal);
 	}
 
+	static class ViewHolder {
+		TextView titleView;
+	}
+
+	private static final String TAG = "SubjectChooserAdapter";
 	private LayoutInflater mInflater;
 	private GoogleCalendar selection;
+
 	private Context context;
 
 	private List<GoogleCalendar> mData = new ArrayList<GoogleCalendar>();
 
 	private OnCalendarSelectedListener listener;
 
-	static class ViewHolder {
-		TextView titleView;
-	}
-
 	public CalendarChooserAdapter(Context context) {
 		this.mInflater = LayoutInflater.from(context);
 		this.context = context;
+	}
+
+	public void addItem(GoogleCalendar cal) {
+		if (mData == null) {
+			mData = new ArrayList<GoogleCalendar>();
+		}
+
+		mData.add(cal);
+
+		notifyDataSetChanged();
 	}
 
 	@Override
@@ -78,8 +103,9 @@ public class CalendarChooserAdapter extends BaseAdapter {
 					int padding = context.getResources().getDimensionPixelSize(
 							R.dimen.default_list_padding);
 					convertView.setPadding(padding, padding, padding, padding);
-				}else{
-					convertView.setBackgroundResource(android.R.color.transparent);
+				} else {
+					convertView
+							.setBackgroundResource(android.R.color.transparent);
 				}
 			} else {
 				convertView.setBackgroundResource(android.R.color.transparent);
@@ -95,20 +121,20 @@ public class CalendarChooserAdapter extends BaseAdapter {
 
 				@Override
 				public void onClick(View v) {
-					if (selection != null){
-						if (selection.equals(getItem(position))){
+					if (selection != null) {
+						if (selection.equals(getItem(position))) {
 							selection = null;
-						}else{
+						} else {
 							selection = getItem(position);
 						}
-					}else{
+					} else {
 						selection = getItem(position);
-					}					
+					}
 
 					if (listener != null) {
 						listener.onCalendarSelected(selection);
 					}
-					
+
 					notifyDataSetChanged();
 				}
 			});
@@ -134,16 +160,6 @@ public class CalendarChooserAdapter extends BaseAdapter {
 	public void setOnCalendarSelectedListener(
 			OnCalendarSelectedListener listener) {
 		this.listener = listener;
-	}
-
-	public void addItem(GoogleCalendar cal) {
-		if (mData == null) {
-			mData = new ArrayList<GoogleCalendar>();
-		}
-		
-		mData.add(cal);
-		
-		notifyDataSetChanged();
 	}
 
 	public void setSelection(GoogleCalendar cal) {

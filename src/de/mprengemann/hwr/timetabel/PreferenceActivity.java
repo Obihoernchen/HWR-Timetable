@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel;
 
 import java.text.ParseException;
@@ -24,7 +39,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
 import android.text.InputType;
-import android.util.Log;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -41,7 +55,9 @@ import de.mprengemann.hwr.timetabel.data.GoogleCalendar;
 @EActivity
 public class PreferenceActivity extends SherlockPreferenceActivity {
 
+	@SuppressWarnings("unused")
 	private static final String TAG = "PreferenceActivity";
+	
 	private SharedPreferences prefs;
 	private boolean isChanged = false;
 	private boolean refreshHistory = false;
@@ -59,6 +75,38 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 	private Preference pref_sync_force;
 
 	private Handler mHandler = new Handler();
+
+	@Override
+	public void finish() {
+		kursNeu = prefs.getString(getString(R.string.prefs_kursKey), "n/a");
+		fachrichtungNeu = prefs.getString(
+				getString(R.string.prefs_fachrichtungKey), "n/a");
+		semesterNeu = prefs.getString(getString(R.string.prefs_semesterKey),
+				"n/a");
+		matrikelNrNeu = prefs.getString(
+				getString(R.string.prefs_matrikelNrKey), "n/a");
+		showPastStringNeu = prefs.getString("showHistory", "n/a");
+
+		if (!kursNeu.equals(kurs) || !fachrichtungNeu.equals(fachrichtung)
+				|| !semesterNeu.equals(semester)
+				|| !matrikelNrNeu.equals(matrikelNr)) {
+			isChanged = true;
+		}
+		if (!showPastString.equals(showPastStringNeu)) {
+			refreshHistory = true;
+		}
+
+		Intent data = new Intent();
+
+		data.putExtra(getString(R.string.intent_data_preferences_changed),
+				isChanged);
+		data.putExtra(getString(R.string.intent_data_refresh_history),
+				refreshHistory);
+
+		setResult(RESULT_OK, data);
+
+		super.finish();
+	}
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -242,17 +290,10 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 										ProgressDialog dialog;
 
 										@Override
-										public void onStartRemoving() {
-											dialog = ProgressDialog
-													.show(PreferenceActivity.this,
-															getString(R.string.dialog_sync_title),
-															getString(R.string.dialog_sync_msg),
-															true);
-										}
-
-										@Override
-										public void onStartPublishing() {
-
+										public void onFinishPublishing() {
+											if (dialog != null) {
+												dialog.dismiss();
+											}
 										}
 
 										@Override
@@ -261,10 +302,17 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 										}
 
 										@Override
-										public void onFinishPublishing() {
-											if (dialog != null) {
-												dialog.dismiss();
-											}
+										public void onStartPublishing() {
+
+										}
+
+										@Override
+										public void onStartRemoving() {
+											dialog = ProgressDialog
+													.show(PreferenceActivity.this,
+															getString(R.string.dialog_sync_title),
+															getString(R.string.dialog_sync_msg),
+															true);
 										}
 									});
 
@@ -287,15 +335,6 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 										ProgressDialog dialog;
 
 										@Override
-										public void onStart() {
-											dialog = ProgressDialog
-													.show(PreferenceActivity.this,
-															getString(R.string.dialog_export_title),
-															getString(R.string.dialog_export_msg),
-															true);
-										}
-
-										@Override
 										public void onFinish(String path) {
 											dialog.dismiss();
 											Toast.makeText(
@@ -303,49 +342,20 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 													path, Toast.LENGTH_LONG)
 													.show();
 										}
+
+										@Override
+										public void onStart() {
+											dialog = ProgressDialog
+													.show(PreferenceActivity.this,
+															getString(R.string.dialog_export_title),
+															getString(R.string.dialog_export_msg),
+															true);
+										}
 									});
 							return false;
 						}
 					});
 		}
-	}
-
-	@Override
-	public void finish() {
-		kursNeu = prefs.getString(getString(R.string.prefs_kursKey), "n/a");
-		fachrichtungNeu = prefs.getString(
-				getString(R.string.prefs_fachrichtungKey), "n/a");
-		semesterNeu = prefs.getString(getString(R.string.prefs_semesterKey),
-				"n/a");
-		matrikelNrNeu = prefs.getString(
-				getString(R.string.prefs_matrikelNrKey), "n/a");
-		showPastStringNeu = prefs.getString("showHistory", "n/a");
-
-		Log.i(TAG, kurs + " " + kursNeu);
-		Log.i(TAG, fachrichtung + " " + fachrichtungNeu);
-		Log.i(TAG, semester + " " + semesterNeu);
-		Log.i(TAG, matrikelNr + " " + matrikelNrNeu);
-		Log.i(TAG, showPastString + " " + showPastStringNeu);
-
-		if (!kursNeu.equals(kurs) || !fachrichtungNeu.equals(fachrichtung)
-				|| !semesterNeu.equals(semester)
-				|| !matrikelNrNeu.equals(matrikelNr)) {
-			isChanged = true;
-		}
-		if (!showPastString.equals(showPastStringNeu)) {
-			refreshHistory = true;
-		}
-
-		Intent data = new Intent();
-
-		data.putExtra(getString(R.string.intent_data_preferences_changed),
-				isChanged);
-		data.putExtra(getString(R.string.intent_data_refresh_history),
-				refreshHistory);
-
-		setResult(RESULT_OK, data);
-
-		super.finish();
 	}
 
 	@Override

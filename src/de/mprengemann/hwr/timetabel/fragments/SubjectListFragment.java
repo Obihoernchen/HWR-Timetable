@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel.fragments;
 
 import java.util.List;
@@ -27,28 +42,50 @@ import de.mprengemann.hwr.timetabel.viewadapters.SubjectsAdapter.OnDataChangeLis
 @EFragment(R.layout.fragment_subject_list)
 public class SubjectListFragment extends SherlockFragment {
 
-	private static final String TAG = "SubjectListFragment";
-
 	public interface OnItemClickListener {
 		public void onClick(long subject_id, long event_id);
 
 		public boolean onLongClick(long subject_id, long event_id);
 	}
 
-	@ViewById(R.id.list_subjects)
-	ListView listView;
-	@ViewById(R.id.text_subjects_empty)
-	TextView empty;
-	@App
-	TimetableApplication application;
-
-	private SubjectsAdapter mAdapter;
-	private OnItemClickListener onItemClickListener;
-	private MenuItem menuItemToShow;
+	private static final String TAG = "SubjectListFragment";
 
 	public static SubjectListFragment_ newInstance() {
 		SubjectListFragment_ f = new SubjectListFragment_();
 		return f;
+	}
+	@ViewById(R.id.list_subjects)
+	ListView listView;
+	@ViewById(R.id.text_subjects_empty)
+	TextView empty;
+
+	@App
+	TimetableApplication application;
+	private SubjectsAdapter mAdapter;
+	private OnItemClickListener onItemClickListener;
+
+	private MenuItem menuItemToShow;
+
+	public void addItem(Events e) {
+		if (mAdapter != null) {
+			mAdapter.addItem(e);
+		}
+	}
+
+	public void addSeparatorItem(String str) {
+		if (mAdapter != null) {
+			mAdapter.addSeparatorItem(str);
+		}
+	}
+
+	public void clear() {
+		if (mAdapter != null) {
+			mAdapter.clear();
+		}
+	}
+
+	public void fillList() {
+		mAdapter.setItems(application.getEvents());
 	}
 
 	@AfterViews
@@ -78,16 +115,6 @@ public class SubjectListFragment extends SherlockFragment {
 		application.setOnTimetableDataListener(new OnTimetableDataListener() {
 
 			@Override
-			public void onLoadingStarted() {
-				Log.i(TAG, "Start!!");
-
-				getSherlockActivity().setSupportProgress(Window.PROGRESS_END);
-				mAdapter.setLoading(true);
-				getSherlockActivity()
-						.setSupportProgressBarIndeterminateVisibility(true);
-			}
-
-			@Override
 			public void onLoadingFinished(final List<Events> result) {
 				Log.i(TAG, "End!!");
 
@@ -99,6 +126,16 @@ public class SubjectListFragment extends SherlockFragment {
 
 				getSherlockActivity()
 						.setSupportProgressBarIndeterminateVisibility(false);
+			}
+
+			@Override
+			public void onLoadingStarted() {
+				Log.i(TAG, "Start!!");
+
+				getSherlockActivity().setSupportProgress(Window.PROGRESS_END);
+				mAdapter.setLoading(true);
+				getSherlockActivity()
+						.setSupportProgressBarIndeterminateVisibility(true);
 			}
 
 		});
@@ -139,28 +176,6 @@ public class SubjectListFragment extends SherlockFragment {
 		fillList();
 	}
 
-	public void addItem(Events e) {
-		if (mAdapter != null) {
-			mAdapter.addItem(e);
-		}
-	}
-
-	public void addSeparatorItem(String str) {
-		if (mAdapter != null) {
-			mAdapter.addSeparatorItem(str);
-		}
-	}
-
-	public void clear() {
-		if (mAdapter != null) {
-			mAdapter.clear();
-		}
-	}
-
-	public void showAfter(final MenuItem item) {
-		this.menuItemToShow = item;
-	}
-
 	public void scrollTo(String item) {
 		if (mAdapter != null) {
 			if (listView != null) {
@@ -169,17 +184,17 @@ public class SubjectListFragment extends SherlockFragment {
 		}
 	}
 
-	public void fillList() {
-		mAdapter.setItems(application.getEvents());
+	public void setInitalState() {
+		clear();
+		empty.setVisibility(View.VISIBLE);
+		empty.setText(R.string.text_no_subjects);
 	}
 
 	public void setOnItemClickListener(OnItemClickListener listener) {
 		this.onItemClickListener = listener;
 	}
 
-	public void setInitalState() {
-		clear();
-		empty.setVisibility(View.VISIBLE);
-		empty.setText(R.string.text_no_subjects);
+	public void showAfter(final MenuItem item) {
+		this.menuItemToShow = item;
 	}
 }

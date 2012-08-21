@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel.fragments.viewpager;
 
 import java.util.List;
@@ -11,6 +26,7 @@ import de.mprengemann.hwr.timetabel.fragments.SubjectDetailFragment_;
 
 public class SubjectDetailFragmentAdapter extends FragmentPagerAdapter {
 
+	@SuppressWarnings("unused")
 	private static final String TAG = "SubjectDetailFragmentAdapter";
 	private List<Subjects> mSubjects;
 	private long event_id = 0;
@@ -28,12 +44,9 @@ public class SubjectDetailFragmentAdapter extends FragmentPagerAdapter {
 		loadData();
 	}
 
-	void loadData() {
-		this.mSubjects = app.getVisibleSubjects();
-	}
-
-	public void setSelectedEvent(long event_id) {
-		this.event_id = event_id;
+	@Override
+	public int getCount() {
+		return mSubjects.size();
 	}
 
 	@Override
@@ -46,15 +59,6 @@ public class SubjectDetailFragmentAdapter extends FragmentPagerAdapter {
 		}
 	}
 
-	private long getSubjectId(int position) {
-		return mSubjects.get(position).getId();
-	}
-
-	@Override
-	public int getCount() {
-		return mSubjects.size();
-	}
-
 	@Override
 	public CharSequence getPageTitle(int position) {
 
@@ -65,5 +69,17 @@ public class SubjectDetailFragmentAdapter extends FragmentPagerAdapter {
 		}
 
 		return s;
+	}
+
+	private long getSubjectId(int position) {
+		return mSubjects.get(position).getId();
+	}
+
+	void loadData() {
+		this.mSubjects = app.getVisibleSubjects();
+	}
+
+	public void setSelectedEvent(long event_id) {
+		this.event_id = event_id;
 	}
 }

@@ -32,9 +32,10 @@ public class EventsDao extends AbstractDao<Events, Long> {
         public final static Property Uid = new Property(1, String.class, "uid", false, "UID");
         public final static Property Room = new Property(2, String.class, "room", false, "ROOM");
         public final static Property Lecturer = new Property(3, String.class, "lecturer", false, "LECTURER");
-        public final static Property Start = new Property(4, java.util.Date.class, "start", false, "START");
-        public final static Property SubjectId = new Property(5, long.class, "subjectId", false, "SUBJECT_ID");
-        public final static Property End = new Property(6, java.util.Date.class, "end", false, "END");
+        public final static Property Type = new Property(4, String.class, "type", false, "TYPE");
+        public final static Property Start = new Property(5, java.util.Date.class, "start", false, "START");
+        public final static Property SubjectId = new Property(6, long.class, "subjectId", false, "SUBJECT_ID");
+        public final static Property End = new Property(7, java.util.Date.class, "end", false, "END");
     };
 
     private DaoSession daoSession;
@@ -58,9 +59,10 @@ public class EventsDao extends AbstractDao<Events, Long> {
                 "'UID' TEXT NOT NULL UNIQUE ," + // 1: uid
                 "'ROOM' TEXT NOT NULL ," + // 2: room
                 "'LECTURER' TEXT NOT NULL ," + // 3: lecturer
-                "'START' INTEGER," + // 4: start
-                "'SUBJECT_ID' INTEGER NOT NULL ," + // 5: subjectId
-                "'END' INTEGER);"); // 6: end
+                "'TYPE' TEXT NOT NULL ," + // 4: type
+                "'START' INTEGER," + // 5: start
+                "'SUBJECT_ID' INTEGER NOT NULL ," + // 6: subjectId
+                "'END' INTEGER);"); // 7: end
     }
 
     /** Drops the underlying database table. */
@@ -81,16 +83,17 @@ public class EventsDao extends AbstractDao<Events, Long> {
         stmt.bindString(2, entity.getUid());
         stmt.bindString(3, entity.getRoom());
         stmt.bindString(4, entity.getLecturer());
+        stmt.bindString(5, entity.getType());
  
         java.util.Date start = entity.getStart();
         if (start != null) {
-            stmt.bindLong(5, start.getTime());
+            stmt.bindLong(6, start.getTime());
         }
-        stmt.bindLong(6, entity.getSubjectId());
+        stmt.bindLong(7, entity.getSubjectId());
  
         java.util.Date end = entity.getEnd();
         if (end != null) {
-            stmt.bindLong(7, end.getTime());
+            stmt.bindLong(8, end.getTime());
         }
     }
 
@@ -114,9 +117,10 @@ public class EventsDao extends AbstractDao<Events, Long> {
             cursor.getString(offset + 1), // uid
             cursor.getString(offset + 2), // room
             cursor.getString(offset + 3), // lecturer
-            cursor.isNull(offset + 4) ? null : new java.util.Date(cursor.getLong(offset + 4)), // start
-            cursor.getLong(offset + 5), // subjectId
-            cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)) // end
+            cursor.getString(offset + 4), // type
+            cursor.isNull(offset + 5) ? null : new java.util.Date(cursor.getLong(offset + 5)), // start
+            cursor.getLong(offset + 6), // subjectId
+            cursor.isNull(offset + 7) ? null : new java.util.Date(cursor.getLong(offset + 7)) // end
         );
         return entity;
     }
@@ -128,9 +132,10 @@ public class EventsDao extends AbstractDao<Events, Long> {
         entity.setUid(cursor.getString(offset + 1));
         entity.setRoom(cursor.getString(offset + 2));
         entity.setLecturer(cursor.getString(offset + 3));
-        entity.setStart(cursor.isNull(offset + 4) ? null : new java.util.Date(cursor.getLong(offset + 4)));
-        entity.setSubjectId(cursor.getLong(offset + 5));
-        entity.setEnd(cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)));
+        entity.setType(cursor.getString(offset + 4));
+        entity.setStart(cursor.isNull(offset + 5) ? null : new java.util.Date(cursor.getLong(offset + 5)));
+        entity.setSubjectId(cursor.getLong(offset + 6));
+        entity.setEnd(cursor.isNull(offset + 7) ? null : new java.util.Date(cursor.getLong(offset + 7)));
      }
     
     /** @inheritdoc */

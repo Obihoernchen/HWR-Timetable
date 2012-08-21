@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2012 Marc Prengemann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package de.mprengemann.hwr.timetabel;
 
 import java.util.ArrayList;
@@ -22,9 +37,9 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
@@ -65,6 +80,70 @@ public class TimetableActivity extends SherlockFragmentActivity {
 	@App
 	TimetableApplication application;
 	private MenuItem refreshItem;
+
+	private void initListNavigation() {
+		Context context = getSupportActionBar().getThemedContext();
+		final ArrayAdapter<CharSequence> listAdapter = new ArrayAdapter<CharSequence>(
+				context, R.layout.sherlock_spinner_item,
+				application.getEventsDates());
+
+		listAdapter
+				.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+
+		if (listAdapter.isEmpty()) {
+			getSupportActionBar().setNavigationMode(
+					ActionBar.NAVIGATION_MODE_STANDARD);
+		} else {
+			getSupportActionBar().setNavigationMode(
+					ActionBar.NAVIGATION_MODE_LIST);
+		}
+
+		getSupportActionBar().setListNavigationCallbacks(listAdapter,
+				new OnNavigationListener() {
+
+					@Override
+					public boolean onNavigationItemSelected(int itemPosition,
+							long itemId) {
+						subjectFragment.scrollTo(String.valueOf(listAdapter
+								.getItem(itemPosition)));
+						return true;
+					}
+				});
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case PREFERENCE_REQUEST:
+			if (resultCode == RESULT_OK) {
+				if (data.getBooleanExtra(
+						getString(R.string.intent_data_preferences_changed),
+						false)) {
+					getSupportActionBar().setNavigationMode(
+							ActionBar.NAVIGATION_MODE_STANDARD);
+
+					refreshItem.setVisible(false);
+
+					Parser p = new Parser(TimetableActivity.this,
+							parsingListener);
+					p.execute();
+
+					subjectFragment.clear();
+				} else if (data.getBooleanExtra(
+						getString(R.string.intent_data_refresh_history), false)) {
+					subjectFragment.clear();
+					subjectFragment.fillList();
+				}
+			}
+			break;
+		case DONATE_REQUEST:
+			Toast.makeText(this, getString(R.string.dialog_donate),
+					Toast.LENGTH_LONG).show();
+			break;
+		default:
+			break;
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -109,128 +188,6 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			startUpCheck();
 		} catch (Exception e) {
 			Log.e(TAG, "Can't show Dialog on startup check! " + e.getMessage());
-		}
-	}
-
-	@SuppressWarnings("deprecation")
-	private void startUpCheck() {
-		final SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
-
-		parsingListener = new OnLoadingListener() {
-			
-			ProgressDialog dialog;
-			List<Subjects> visibleSubjects = new ArrayList<Subjects>(); 
-			List<Subjects> allSubjects = new ArrayList<Subjects>();
-			
-			@Override
-			public void onNewItem(Subjects s, Events e) {
-				if (!visibleSubjects.contains(s) && !allSubjects.contains(s)){
-					s.setShow(true);
-				}else if (visibleSubjects.contains(s)){
-					s.setShow(true);
-				}else{
-					s.setShow(false);
-				}
-							
-				application.onNewItem(s, e);
-			}
-
-			@Override
-			public void onLoadingStarted(String msg) {
-				dialog = ProgressDialog
-						.show(TimetableActivity.this,
-								getString(R.string.dialog_sync_title),
-								getString(R.string.dialog_sync_msg),
-								true, false);
-				
-				visibleSubjects = application.getVisibleSubjects();
-				allSubjects = application.getSubjects();
-				
-				application.removeAllData();
-				application.onLoadingStarted();
-			}
-
-			@Override
-			public void onLoadingFinished(boolean hasError) {
-				if (!hasError) {
-					Calendar calendar = GregorianCalendar.getInstance();
-
-					Editor edit = prefs.edit();
-					edit.putLong(getString(R.string.prefs_lastUpdated_user),
-							calendar.getTimeInMillis());
-
-					calendar.set(Calendar.HOUR_OF_DAY, 0);
-					calendar.set(Calendar.MINUTE, 0);
-					calendar.set(Calendar.SECOND, 0);
-					calendar.set(Calendar.MILLISECOND, 0);
-
-					edit.putLong(getString(R.string.prefs_lastUpdated),
-							calendar.getTimeInMillis());
-					edit.commit();
-
-					initListNavigation();
-
-					if (prefs.getBoolean(
-							getString(R.string.prefs_cal_sync_Key), false)) {
-						if (prefs
-								.getLong(getString(R.string.prefs_cal_Key), -1) > -1) {
-							CalendarUtils.syncTimetable(
-									(TimetableApplication_) getApplication(),
-									TimetableActivity.this, prefs.getLong(
-											getString(R.string.prefs_cal_Key),
-											-1), new CalendarSyncListener() {
-
-										@Override
-										public void onStartRemoving() {
-										}
-
-										@Override
-										public void onStartPublishing() {
-
-										}
-
-										@Override
-										public void onFinishRemoving() {
-
-										}
-
-										@Override
-										public void onFinishPublishing() {
-											dialog.dismiss();
-										}
-									});
-						}else{
-							dialog.dismiss();							
-						}
-					}else{						
-						dialog.dismiss();						
-					}
-				}else{
-					dialog.dismiss();
-				}
-
-				refreshItem.setVisible(true);
-				application.onLoadingFinished();
-			}
-
-			@Override
-			public void onError(final OnLoadingListener listener) {
-				resultPassedListener = listener;
-				showDialog(ERROR_DIALOG);
-			}
-
-		};
-
-		if (Utils.shouldCheckForDate(prefs.getLong(
-				getString(R.string.prefs_lastUpdated), 0))) {
-			if (prefs.getString(getString(R.string.prefs_matrikelNrKey), null) == null) {
-				Intent i = new Intent(TimetableActivity.this,
-						PreferenceActivity_.class);
-				startActivityForResult(i, PREFERENCE_REQUEST);
-			} else {
-				showDialog(NEW_TIMETABLEPLAN);
-			}
 		}
 	}
 
@@ -298,6 +255,25 @@ public class TimetableActivity extends SherlockFragmentActivity {
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							SharedPreferences prefs = PreferenceManager
+									.getDefaultSharedPreferences(TimetableActivity.this);
+
+							Calendar calendar = Calendar.getInstance();
+
+							Editor edit = prefs.edit();
+							edit.putLong(
+									getString(R.string.prefs_lastUpdated_user),
+									calendar.getTimeInMillis());
+
+							calendar.set(Calendar.HOUR_OF_DAY, 0);
+							calendar.set(Calendar.MINUTE, 0);
+							calendar.set(Calendar.SECOND, 0);
+							calendar.set(Calendar.MILLISECOND, 0);
+
+							edit.putLong(getString(R.string.prefs_lastUpdated),
+									calendar.getTimeInMillis());
+							edit.commit();
+
 							dialog.cancel();
 						}
 					});
@@ -342,7 +318,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item != null) {
 			Intent i;
-			
+
 			switch (item.getItemId()) {
 			case R.id.menu_refresh:
 				Parser p = new Parser(TimetableActivity.this, parsingListener);
@@ -393,9 +369,11 @@ public class TimetableActivity extends SherlockFragmentActivity {
 				showDialog(LICENSE_DIALOG);
 				break;
 			case R.id.menu_donate:
-				i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sites.google.com/site/hwrberlinstundenplanapp/spenden"));
-		        startActivityForResult(i, DONATE_REQUEST);
-		        
+				i = new Intent(
+						Intent.ACTION_VIEW,
+						Uri.parse("https://sites.google.com/site/hwrberlinstundenplanapp/spenden"));
+				startActivityForResult(i, DONATE_REQUEST);
+
 				break;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -405,69 +383,6 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		}
 
 		return super.onOptionsItemSelected(item);
-	}
-
-	private void initListNavigation() {
-		Context context = getSupportActionBar().getThemedContext();
-		final ArrayAdapter<CharSequence> listAdapter = new ArrayAdapter<CharSequence>(
-				context, R.layout.sherlock_spinner_item,
-				application.getEventsDates());
-
-		listAdapter
-				.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
-
-		if (listAdapter.isEmpty()) {
-			getSupportActionBar().setNavigationMode(
-					ActionBar.NAVIGATION_MODE_STANDARD);
-		} else {
-			getSupportActionBar().setNavigationMode(
-					ActionBar.NAVIGATION_MODE_LIST);
-		}
-
-		getSupportActionBar().setListNavigationCallbacks(listAdapter,
-				new OnNavigationListener() {
-
-					@Override
-					public boolean onNavigationItemSelected(int itemPosition,
-							long itemId) {
-						subjectFragment.scrollTo(String.valueOf(listAdapter
-								.getItem(itemPosition)));
-						return true;
-					}
-				});
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode) {
-		case PREFERENCE_REQUEST:
-			if (resultCode == RESULT_OK) {
-				if (data.getBooleanExtra(
-						getString(R.string.intent_data_preferences_changed),
-						false)) {
-					getSupportActionBar().setNavigationMode(
-							ActionBar.NAVIGATION_MODE_STANDARD);
-
-					refreshItem.setVisible(false);
-
-					Parser p = new Parser(TimetableActivity.this,
-							parsingListener);
-					p.execute();
-
-					subjectFragment.clear();
-				} else if (data.getBooleanExtra(
-						getString(R.string.intent_data_refresh_history), false)) {
-					subjectFragment.clear();
-					subjectFragment.fillList();
-				}
-			}
-			break;
-		case DONATE_REQUEST:
-			Toast.makeText(this, getString(R.string.dialog_donate), Toast.LENGTH_LONG).show();
-			break;
-		default:
-			break;
-		}
 	}
 
 	private void sendFeedBack() {
@@ -488,5 +403,128 @@ public class TimetableActivity extends SherlockFragmentActivity {
 
 		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, myBodyText);
 		startActivity(Intent.createChooser(emailIntent, "e-Mail senden ..."));
+	}
+
+	@SuppressWarnings("deprecation")
+	private void startUpCheck() {
+		final SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+
+		parsingListener = new OnLoadingListener() {
+
+			ProgressDialog dialog;
+			List<Subjects> visibleSubjects = new ArrayList<Subjects>();
+			List<Subjects> allSubjects = new ArrayList<Subjects>();
+
+			@Override
+			public void onError(final OnLoadingListener listener) {
+				resultPassedListener = listener;
+				dialog.dismiss();
+				showDialog(ERROR_DIALOG);
+			}
+
+			@Override
+			public void onLoadingFinished(boolean hasError) {
+				if (!hasError) {
+					Calendar calendar = GregorianCalendar.getInstance();
+
+					Editor edit = prefs.edit();
+					edit.putLong(getString(R.string.prefs_lastUpdated_user),
+							calendar.getTimeInMillis());
+
+					calendar.set(Calendar.HOUR_OF_DAY, 0);
+					calendar.set(Calendar.MINUTE, 0);
+					calendar.set(Calendar.SECOND, 0);
+					calendar.set(Calendar.MILLISECOND, 0);
+
+					edit.putLong(getString(R.string.prefs_lastUpdated),
+							calendar.getTimeInMillis());
+					edit.commit();
+
+					initListNavigation();
+
+					if (prefs.getBoolean(
+							getString(R.string.prefs_cal_sync_Key), false)) {
+						if (prefs
+								.getLong(getString(R.string.prefs_cal_Key), -1) > -1) {
+							CalendarUtils.syncTimetable(
+									(TimetableApplication_) getApplication(),
+									TimetableActivity.this, prefs.getLong(
+											getString(R.string.prefs_cal_Key),
+											-1), new CalendarSyncListener() {
+
+										@Override
+										public void onFinishPublishing() {
+											dialog.dismiss();
+										}
+
+										@Override
+										public void onFinishRemoving() {
+
+										}
+
+										@Override
+										public void onStartPublishing() {
+
+										}
+
+										@Override
+										public void onStartRemoving() {
+										}
+									});
+						} else {
+							dialog.dismiss();
+						}
+					} else {
+						dialog.dismiss();
+					}
+				} else {
+					dialog.dismiss();
+				}
+
+				refreshItem.setVisible(true);
+				application.onLoadingFinished();
+			}
+
+			@Override
+			public void onLoadingStarted(String msg) {
+				dialog = ProgressDialog.show(TimetableActivity.this,
+						getString(R.string.dialog_sync_title),
+						getString(R.string.dialog_sync_msg), true, false);
+
+				visibleSubjects = application.getVisibleSubjects();
+				allSubjects = application.getSubjects();
+
+				application.removeAllData();
+				application.onLoadingStarted();
+			}
+
+			@Override
+			public void onNewItem(Subjects s, Events e) {
+				if (!visibleSubjects.contains(s) && !allSubjects.contains(s)) {
+					s.setShow(true);
+				} else if (visibleSubjects.contains(s)) {
+					s.setShow(true);
+				} else {
+					s.setShow(false);
+				}
+
+				application.onNewItem(s, e);
+			}
+
+		};
+
+		if (Utils.shouldCheckForDate(prefs.getLong(
+				getString(R.string.prefs_lastUpdated), 0))) {
+			if (prefs.getString(getString(R.string.prefs_matrikelNrKey), null) == null) {
+				Intent i = new Intent(TimetableActivity.this,
+						PreferenceActivity_.class);
+				startActivityForResult(i, PREFERENCE_REQUEST);
+			} else {
+				if (prefs.getBoolean(getString(R.string.prefs_notifyKey), true)) {
+					showDialog(NEW_TIMETABLEPLAN);
+				}
+			}
+		}
 	}
 }
