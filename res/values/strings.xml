@@ -82,7 +82,7 @@ limitations under the License. -->
     <string name="text_today">Heute</string>
     <string name="text_tomorrow">Morgen</string>
     <string name="text_twoago">Vorgestern</string>
-    <string name="text_yesterday">Gester</string>
+    <string name="text_yesterday">Gestern</string>
     <string name="text_no_subjects_in_time">Keine weiteren Termine vorhanden!</string>
     <string name="text_no_subjects">Ihr Stundenplan enthält keine Termine.\n\nBitte sychronisieren Sie!</string>
     <string name="intent_data_preferences_changed">prefs_indicator_isChanged</string>

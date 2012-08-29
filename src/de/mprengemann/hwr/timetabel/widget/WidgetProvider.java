@@ -18,6 +18,7 @@ package de.mprengemann.hwr.timetabel.widget;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
@@ -42,8 +43,8 @@ public class WidgetProvider extends AppWidgetProvider {
 	public static String REFRESH_ACTION = "de.mprengemann.hwr.timetabel.widget.REFRESH";
 	public static final String EXTRA_FIRST_END_DATE = "de.mprengemann.hwr.timetabel.widget.first_end";
 	
-	private final SimpleDateFormat df_day = new SimpleDateFormat("EEEEEEEEEE");
-	private final SimpleDateFormat df_date = new SimpleDateFormat("dd.MM.yyyy");
+	private final SimpleDateFormat df_day = new SimpleDateFormat("EEEEEEEEEE", Locale.GERMANY);
+	private final SimpleDateFormat df_date = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
 	@Override
 	public void onReceive(Context ctx, Intent intent) {

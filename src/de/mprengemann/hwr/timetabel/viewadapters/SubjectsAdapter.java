@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import android.content.Context;
@@ -63,8 +64,8 @@ public class SubjectsAdapter extends BaseAdapter {
 	private static final String TAG = "SubjectsAdapter";
 	private LayoutInflater mInflater;
 
-	private SimpleDateFormat df = new SimpleDateFormat("HH:mm");
-	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+	private SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.GERMANY);
+	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("EE, dd.MM.yyyy", Locale.GERMANY);
 	private HashMap<Integer, Events> mData = new HashMap<Integer, Events>();
 	private HashMap<Integer, String> mSeparatorsSet = new HashMap<Integer, String>();
 

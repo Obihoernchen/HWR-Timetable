@@ -17,6 +17,7 @@ package de.mprengemann.hwr.timetabel.widget;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -50,8 +51,8 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 	private SparseArray<Events> mData = new SparseArray<Events>();
 	private SparseArray<String> mSeparatorsSet = new SparseArray<String>();
 
-	private SimpleDateFormat df = new SimpleDateFormat("HH:mm");
-	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+	private SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.GERMANY);
+	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
 
 	public ListRemoteViewsFactory(Context context,
 			TimetableApplication_ application, Intent intent) {
