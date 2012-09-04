@@ -16,6 +16,7 @@ limitations under the License. -->
 
 <resources>    
     <string name="app_name">HWR Berlin Stundenplan</string>
+    <string name="bugtracking_api">a7cb362b</string>
     
     <!-- PREFERENCES -->
     <string name="prefs_cal_sync_Key">prefs_cal_sync</string>

@@ -20,6 +20,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -151,4 +153,12 @@ public class WidgetProvider extends AppWidgetProvider {
 
 		context.startService(intent);
 	}
+
+	@Override
+	public void onEnabled(Context context) {
+		super.onEnabled(context);
+		BugSenseHandler.setup(context, context.getString(R.string.bugtracking_api));
+	}
+	
+	
 }

@@ -47,6 +47,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.bugsense.trace.BugSenseHandler;
+import com.googlecode.androidannotations.annotations.AfterViews;
 import com.googlecode.androidannotations.annotations.App;
 import com.googlecode.androidannotations.annotations.EActivity;
 
@@ -80,6 +82,11 @@ public class TimetableActivity extends SherlockFragmentActivity {
 	@App
 	TimetableApplication application;
 	private MenuItem refreshItem;
+	
+	@AfterViews
+	public void initBugSense(){
+		BugSenseHandler.setup(this, getString(R.string.bugtracking_api));
+	}
 
 	private void initListNavigation() {
 		Context context = getSupportActionBar().getThemedContext();
