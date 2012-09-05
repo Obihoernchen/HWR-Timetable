@@ -24,6 +24,7 @@ import java.util.List;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 
@@ -38,7 +39,6 @@ public class TimetableApplication extends Application {
 
 	public interface OnTimetableDataListener {
 		void onLoadingFinished(List<Events> result);
-
 		void onLoadingStarted();
 	}
 
@@ -244,7 +244,7 @@ public class TimetableApplication extends Application {
 		}
 	}
 
-	public void onNewItem(Subjects s, Events e) {
+	public void onNewItem(Subjects s, Events e) throws SQLiteConstraintException{
 		if (subjectsDao.queryBuilder().where(Properties.Title.eq(s.getTitle()))
 				.count() == 1) {
 			s.setId(subjectsDao.queryBuilder()

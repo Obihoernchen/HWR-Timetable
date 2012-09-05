@@ -20,6 +20,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.bugsense.trace.BugSenseHandler;
@@ -251,7 +252,11 @@ public class SubjectsAdapter extends BaseAdapter {
 					holder.titleView.setText(item.getSubjects().getTitle());
 				} catch (Exception e) {
 					Log.e(TAG, item.getSubjectId() + " " + item.getSubjects());
-					BugSenseHandler.log(TAG, e);
+					Map<String, String> extraData = new HashMap<String,String>();
+				    extraData.put("subjectsid", String.valueOf(item.getSubjectId()));
+				    extraData.put("subjects", String.valueOf(item.getSubjects()));
+				    
+					BugSenseHandler.log(TAG, extraData, e);
 				}
 
 				holder.roomView.setText(item.getRoom());

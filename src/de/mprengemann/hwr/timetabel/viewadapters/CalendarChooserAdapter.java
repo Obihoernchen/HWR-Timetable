@@ -16,9 +16,9 @@
 package de.mprengemann.hwr.timetabel.viewadapters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import com.bugsense.trace.BugSenseHandler;
+import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
@@ -28,6 +28,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.bugsense.trace.BugSenseHandler;
+
 import de.mprengemann.hwr.timetabel.R;
 import de.mprengemann.hwr.timetabel.data.GoogleCalendar;
 
@@ -117,7 +120,10 @@ public class CalendarChooserAdapter extends BaseAdapter {
 				holder.titleView.setText(item.getDisplayName());
 			} catch (Exception e) {
 				Log.e(TAG, String.valueOf(item.getId()));
-				BugSenseHandler.log(TAG, e);
+				Map<String, String> extraData = new HashMap<String,String>();
+			    extraData.put("itemid", String.valueOf(item.getId()));
+				
+				BugSenseHandler.log(TAG, extraData, e);
 			}
 
 			holder.titleView.setOnClickListener(new OnClickListener() {

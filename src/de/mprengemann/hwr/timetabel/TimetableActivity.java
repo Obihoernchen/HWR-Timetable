@@ -83,11 +83,6 @@ public class TimetableActivity extends SherlockFragmentActivity {
 	TimetableApplication application;
 	private MenuItem refreshItem;
 	
-	@AfterViews
-	public void initBugSense(){
-		BugSenseHandler.setup(this, getString(R.string.bugtracking_api));
-	}
-
 	private void initListNavigation() {
 		Context context = getSupportActionBar().getThemedContext();
 		final ArrayAdapter<CharSequence> listAdapter = new ArrayAdapter<CharSequence>(
@@ -157,6 +152,8 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
+		BugSenseHandler.setup(this, getString(R.string.bugtracking_api));
+		
 		FrameLayout frame = new FrameLayout(this);
 		frame.setId(CONTENT_VIEW_ID);
 		setContentView(frame, new LayoutParams(

@@ -47,7 +47,7 @@ public class SubjectsDao extends AbstractDao<Subjects, Long> {
         db.execSQL("CREATE TABLE " + constraint + "'SUBJECTS' (" + //
                 "'_id' INTEGER PRIMARY KEY ," + // 0: id
                 "'TITLE' TEXT NOT NULL UNIQUE ," + // 1: title
-                "'SHORT_TITLE' TEXT NOT NULL UNIQUE ," + // 2: shortTitle
+                "'SHORT_TITLE' TEXT NOT NULL ," + // 2: shortTitle
                 "'SHOW' INTEGER);"); // 3: show
     }
 

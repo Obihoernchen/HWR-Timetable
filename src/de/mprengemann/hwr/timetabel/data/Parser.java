@@ -23,7 +23,9 @@ import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.PropertyList;
@@ -41,13 +43,15 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
-import com.bugsense.trace.BugSenseHandler;
-
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.bugsense.trace.BugSenseHandler;
+
 import de.mprengemann.hwr.timetabel.Events;
 import de.mprengemann.hwr.timetabel.R;
 import de.mprengemann.hwr.timetabel.Subjects;
@@ -58,11 +62,8 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 
 	public interface OnLoadingListener {
 		void onError(OnLoadingListener listener);
-
 		void onLoadingFinished(boolean hasError);
-
 		void onLoadingStarted(String msg);
-
 		void onNewItem(Subjects s, Events evt);
 	}
 
@@ -83,8 +84,14 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 	protected Void doInBackground(Void... params) {
 		if (Utils.connectionChecker(context)) {
 			try {
-				String matrikelnr = preferences.getString(
+				final String matrikelnr = preferences.getString(
 						context.getString(R.string.prefs_matrikelNrKey), "");
+				final String fachrichtung = preferences.getString(
+						context.getString(R.string.prefs_fachrichtungKey), "1");
+				final String semester = preferences.getString(
+						context.getString(R.string.prefs_semesterKey), "1");
+				final String kurs = preferences.getString(
+						context.getString(R.string.prefs_kursKey), "1");
 
 				DefaultHttpClient httpclient = new DefaultHttpClient();
 				if (preferences.getBoolean(
@@ -134,7 +141,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 
 				cookies = httpclient.getCookieStore().getCookies();
 
-				URL url;
+				final URL url;
 				InputStream is = null;
 				try {
 					url = new URL(Utils.buildURL(context, preferences));
@@ -178,7 +185,14 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 										} catch (ParseException e) {
 											Log.e(TAG,
 													"Error while parsing date");
-											BugSenseHandler.log(TAG, e);
+											Map<String, String> extraData = new HashMap<String,String>();
+										    extraData.put("url", url.toString());
+										    extraData.put("matrikelnr", matrikelnr);
+										    extraData.put("fachrichtung", fachrichtung);
+										    extraData.put("semester", semester);
+										    extraData.put("kurs", kurs);
+											
+											BugSenseHandler.log(TAG, extraData, e);
 										}
 										evt.setRoom(p.getProperty("LOCATION")
 												.getValue());
@@ -198,8 +212,24 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 														""));
 											}
 										}
-
-										listener.onNewItem(s, evt);
+										try{
+											listener.onNewItem(s, evt);
+										}catch (Exception e){
+											connectionAvail = false;
+											Log.e(TAG, e.toString());
+											
+											Map<String, String> extraData = new HashMap<String,String>();
+										    extraData.put("url", url.toString());
+										    extraData.put("matrikelnr", matrikelnr);
+										    extraData.put("fachrichtung", fachrichtung);
+										    extraData.put("semester", semester);
+										    extraData.put("kurs", kurs);
+										    extraData.put("Subject", s.toString());
+										    extraData.put("Event", evt.toString());
+											
+											BugSenseHandler.log(TAG, extraData, e);
+										}
+										
 									}
 								}
 
@@ -207,7 +237,15 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 						} catch (Exception e) {
 							connectionAvail = false;
 							Log.e(TAG, e.toString());
-							BugSenseHandler.log(TAG, e);
+							
+							Map<String, String> extraData = new HashMap<String,String>();
+						    extraData.put("url", url.toString());
+						    extraData.put("matrikelnr", matrikelnr);
+						    extraData.put("fachrichtung", fachrichtung);
+						    extraData.put("semester", semester);
+						    extraData.put("kurs", kurs);
+							
+							BugSenseHandler.log(TAG, extraData, e);
 						}
 					} else {
 						connectionAvail = false;
@@ -215,18 +253,36 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 				} catch (MalformedURLException e) {
 					connectionAvail = false;
 					Log.e(TAG, e.toString());
-					BugSenseHandler.log(TAG, e);
+					Map<String, String> extraData = new HashMap<String,String>();
+				    extraData.put("matrikelnr", matrikelnr);
+				    extraData.put("fachrichtung", fachrichtung);
+				    extraData.put("semester", semester);
+				    extraData.put("kurs", kurs);
+					
+					BugSenseHandler.log(TAG, extraData, e);
 				} catch (IOException e) {
 					connectionAvail = false;
 					Log.e(TAG, e.toString());
-					BugSenseHandler.log(TAG, e);
+					Map<String, String> extraData = new HashMap<String,String>();
+				    extraData.put("matrikelnr", matrikelnr);
+				    extraData.put("fachrichtung", fachrichtung);
+				    extraData.put("semester", semester);
+				    extraData.put("kurs", kurs);
+					
+					BugSenseHandler.log(TAG, extraData, e);
 				} finally {
 					try {
 						is.close();
 					} catch (IOException e) {
 						connectionAvail = false;
 						Log.e(TAG, e.toString());
-						BugSenseHandler.log(TAG, e);
+						Map<String, String> extraData = new HashMap<String,String>();
+					    extraData.put("matrikelnr", matrikelnr);
+					    extraData.put("fachrichtung", fachrichtung);
+					    extraData.put("semester", semester);
+					    extraData.put("kurs", kurs);
+						
+						BugSenseHandler.log(TAG, extraData, e);
 					}
 				}
 

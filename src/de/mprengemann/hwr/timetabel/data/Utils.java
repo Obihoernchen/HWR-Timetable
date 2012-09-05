@@ -26,7 +26,7 @@ import android.net.ConnectivityManager;
 import de.mprengemann.hwr.timetabel.R;
 
 public class Utils {
-	
+
 	@SuppressWarnings("unused")
 	private static final String TAG = "Utils";
 
@@ -47,23 +47,37 @@ public class Utils {
 
 		switch (kurs) {
 		case CASE_KURS:
+			// Versicherung
 			if (fachrichtung == 14) {
 				course = semester + 1;
+			// Tourismus
+			} else if (fachrichtung == 13) {
+				if (semester > 1){
+					course = semester + 1;
+				} else {
+					course = semester - 1;
+				}
 			} else {
 				course = semester - 1;
 			}
+
 			break;
 		case CASE_KURS_A:
 			// Spedition/Logistik oder Versicherung
 			if ((fachrichtung == 11) || (fachrichtung == 14)) {
 				course = (semester - 1) * 2;
+			} else if (fachrichtung == 13){
+				course = (semester - 1) * 2 + 1;
 			} else {
 				course = (semester - 1) * 3;
 			}
 			break;
 		case CASE_KURS_B:
+			// Spedition/Logistik oder Versicherung
 			if ((fachrichtung == 11) || (fachrichtung == 14)) {
 				course = (semester - 1) * 2 + 1;
+			} else if (fachrichtung == 13){
+				course = (semester - 1) * 3 + 2;
 			} else {
 				course = (semester - 1) * 3 + 1;
 			}

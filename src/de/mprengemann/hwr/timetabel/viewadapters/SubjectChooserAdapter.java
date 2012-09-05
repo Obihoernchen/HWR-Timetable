@@ -16,7 +16,9 @@
 package de.mprengemann.hwr.timetabel.viewadapters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.bugsense.trace.BugSenseHandler;
 
@@ -91,7 +93,10 @@ public class SubjectChooserAdapter extends BaseAdapter {
 				holder.checkView.setText(item.getTitle());
 			} catch (Exception e) {
 				Log.e(TAG, String.valueOf(item.getId()));
-				BugSenseHandler.log(TAG, e);
+				Map<String, String> extraData = new HashMap<String,String>();
+			    extraData.put("itemid", String.valueOf(item.getId()));
+				
+				BugSenseHandler.log(TAG, extraData, e);
 			}
 
 			if (changed.contains(Long.valueOf(item.getId()))) {
