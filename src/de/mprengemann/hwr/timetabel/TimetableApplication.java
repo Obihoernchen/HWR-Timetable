@@ -27,6 +27,7 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.googlecode.androidannotations.annotations.EApplication;
 
 import de.mprengemann.hwr.timetabel.DaoMaster.DevOpenHelper;
@@ -80,6 +81,7 @@ public class TimetableApplication extends Application {
 					.getTime();
 		} catch (ParseException e) {
 			past = 1800000;
+			BugSenseHandler.log(TAG, e);
 		}
 
 		if (eventsDao != null) {
@@ -105,6 +107,7 @@ public class TimetableApplication extends Application {
 					.getTime();
 		} catch (ParseException e) {
 			past = 1800000;
+			BugSenseHandler.log(TAG, e);
 		}
 
 		if (eventsDao != null) {
@@ -133,6 +136,7 @@ public class TimetableApplication extends Application {
 						last.setTime(e.getStart());
 					}
 				} catch (ParseException exc) {
+					BugSenseHandler.log(TAG, exc);
 				}
 			}
 

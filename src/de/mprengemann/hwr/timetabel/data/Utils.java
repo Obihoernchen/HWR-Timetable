@@ -18,6 +18,8 @@ package de.mprengemann.hwr.timetabel.data;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -83,6 +85,7 @@ public class Utils {
 			connected = connec.getActiveNetworkInfo().isConnected();
 		} catch (Exception e) {
 			connected = false;
+			BugSenseHandler.log(TAG, e);
 		}
 
 		return connected;

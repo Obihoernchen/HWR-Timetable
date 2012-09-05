@@ -195,6 +195,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			startUpCheck();
 		} catch (Exception e) {
 			Log.e(TAG, "Can't show Dialog on startup check! " + e.getMessage());
+			BugSenseHandler.log(TAG, e);
 		}
 	}
 

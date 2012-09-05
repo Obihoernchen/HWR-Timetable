@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.bugsense.trace.BugSenseHandler;
 import com.googlecode.androidannotations.annotations.EActivity;
 
 import de.mprengemann.hwr.timetabel.CalendarChooserDialog.OnSelectionListener;
@@ -171,6 +172,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 												getString(R.string.prefs_default_showInPast))));
 							} catch (ParseException e) {
 								d.setTimeInMillis(DEFAULT_PAST);
+								BugSenseHandler.log(TAG, e);
 							}
 
 							TimePickerDialog dialog = new TimePickerDialog(

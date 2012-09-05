@@ -23,6 +23,8 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
@@ -328,12 +330,16 @@ public class CalendarUtils {
 						+ file.getAbsolutePath();
 			} catch (SocketException e) {
 				Log.e(TAG, e.toString());
+				BugSenseHandler.log(TAG, e);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, e.toString());
+				BugSenseHandler.log(TAG, e);
 			} catch (IOException e) {
 				Log.e(TAG, e.toString());
+				BugSenseHandler.log(TAG, e);
 			} catch (ValidationException e) {
 				Log.e(TAG, e.toString());
+				BugSenseHandler.log(TAG, e);
 			}
 
 			return context.getString(R.string.dialog_export_error);

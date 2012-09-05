@@ -19,9 +19,12 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Date;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.util.Log;
 
 public class NewNotificationCheck {
+	private static final String TAG = "NewNotificationCheck";
 	private long lastChanged;
 
 	@SuppressWarnings("deprecation")
@@ -49,7 +52,8 @@ public class NewNotificationCheck {
 
 			this.lastChanged = date.getTime();
 		} catch (IOException e) {
-			Log.i("Catch", e.toString());
+			Log.i(TAG, e.toString());
+			BugSenseHandler.log(TAG, e);
 		}
 	}
 

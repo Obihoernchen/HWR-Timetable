@@ -18,6 +18,8 @@ package de.mprengemann.hwr.timetabel.viewadapters;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -89,6 +91,7 @@ public class SubjectChooserAdapter extends BaseAdapter {
 				holder.checkView.setText(item.getTitle());
 			} catch (Exception e) {
 				Log.e(TAG, String.valueOf(item.getId()));
+				BugSenseHandler.log(TAG, e);
 			}
 
 			if (changed.contains(Long.valueOf(item.getId()))) {

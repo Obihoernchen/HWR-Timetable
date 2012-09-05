@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -249,6 +251,7 @@ public class SubjectsAdapter extends BaseAdapter {
 					holder.titleView.setText(item.getSubjects().getTitle());
 				} catch (Exception e) {
 					Log.e(TAG, item.getSubjectId() + " " + item.getSubjects());
+					BugSenseHandler.log(TAG, e);
 				}
 
 				holder.roomView.setText(item.getRoom());
@@ -282,6 +285,7 @@ public class SubjectsAdapter extends BaseAdapter {
 				}
 			} catch (Exception e) {
 				holder.seperatorView.setText(getSeperatorItem(position));
+				BugSenseHandler.log(TAG, e);
 			}
 
 		}

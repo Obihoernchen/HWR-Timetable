@@ -41,6 +41,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -134,7 +136,6 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 
 				URL url;
 				InputStream is = null;
-				Log.i(TAG, cookies.toString());
 				try {
 					url = new URL(Utils.buildURL(context, preferences));
 					URLConnection c = url.openConnection();
@@ -177,6 +178,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 										} catch (ParseException e) {
 											Log.e(TAG,
 													"Error while parsing date");
+											BugSenseHandler.log(TAG, e);
 										}
 										evt.setRoom(p.getProperty("LOCATION")
 												.getValue());
@@ -205,6 +207,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 						} catch (Exception e) {
 							connectionAvail = false;
 							Log.e(TAG, e.toString());
+							BugSenseHandler.log(TAG, e);
 						}
 					} else {
 						connectionAvail = false;
@@ -212,15 +215,18 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 				} catch (MalformedURLException e) {
 					connectionAvail = false;
 					Log.e(TAG, e.toString());
+					BugSenseHandler.log(TAG, e);
 				} catch (IOException e) {
 					connectionAvail = false;
 					Log.e(TAG, e.toString());
+					BugSenseHandler.log(TAG, e);
 				} finally {
 					try {
 						is.close();
 					} catch (IOException e) {
 						connectionAvail = false;
 						Log.e(TAG, e.toString());
+						BugSenseHandler.log(TAG, e);
 					}
 				}
 
@@ -228,6 +234,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 			} catch (Exception e) {
 				connectionAvail = false;
 				Log.e(TAG, e.toString());
+				BugSenseHandler.log(TAG, e);
 			}
 		}
 		return null;

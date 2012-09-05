@@ -19,6 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import com.bugsense.trace.BugSenseHandler;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -188,6 +190,7 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 			} catch (Exception exp) {
 				rv.setTextViewText(R.id.txt_widget_separator,
 						getSeperatorItem(position));
+				BugSenseHandler.log(TAG, exp);
 			}
 
 			break;
