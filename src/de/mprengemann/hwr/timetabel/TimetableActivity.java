@@ -26,6 +26,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -48,7 +49,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bugsense.trace.BugSenseHandler;
-import com.googlecode.androidannotations.annotations.AfterViews;
 import com.googlecode.androidannotations.annotations.App;
 import com.googlecode.androidannotations.annotations.EActivity;
 
@@ -57,6 +57,8 @@ import de.mprengemann.hwr.timetabel.data.CalendarUtils.CalendarSyncListener;
 import de.mprengemann.hwr.timetabel.data.Parser;
 import de.mprengemann.hwr.timetabel.data.Parser.OnLoadingListener;
 import de.mprengemann.hwr.timetabel.data.Utils;
+import de.mprengemann.hwr.timetabel.exceptions.TimetableException;
+import de.mprengemann.hwr.timetabel.exceptions.TimetableException.TimetableErrorType;
 import de.mprengemann.hwr.timetabel.fragments.SubjectChooserFragment.OnSubmitListener;
 import de.mprengemann.hwr.timetabel.fragments.SubjectChooserFragment_;
 import de.mprengemann.hwr.timetabel.fragments.SubjectDetailFragment_;
@@ -67,6 +69,10 @@ import de.mprengemann.hwr.timetabel.fragments.SubjectListFragment.OnItemClickLis
 public class TimetableActivity extends SherlockFragmentActivity {
 
 	private static final String TAG = "TimetableActivity";
+	
+	private static final String KEY_DIALOG_ERROR_TYPE = "error_type";
+	private static final String KEY_DIALOG_ERROR_MSG = "msg";
+	
 	private static final int CONTENT_VIEW_ID = 1010101010;
 	private static final int PREFERENCE_REQUEST = 1212;
 	private static final int DONATE_REQUEST = 13131;
@@ -82,7 +88,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 	@App
 	TimetableApplication application;
 	private MenuItem refreshItem;
-	
+
 	private void initListNavigation() {
 		Context context = getSupportActionBar().getThemedContext();
 		final ArrayAdapter<CharSequence> listAdapter = new ArrayAdapter<CharSequence>(
@@ -153,7 +159,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 
 		BugSenseHandler.setup(this, getString(R.string.bugtracking_api));
-		
+
 		FrameLayout frame = new FrameLayout(this);
 		frame.setId(CONTENT_VIEW_ID);
 		setContentView(frame, new LayoutParams(
@@ -196,6 +202,113 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		}
 	}
 
+	@Override
+	@Deprecated
+	protected Dialog onCreateDialog(int id, Bundle b) {
+		AlertDialog.Builder builder;
+
+		switch (id) {
+		case ERROR_DIALOG:
+			builder = new AlertDialog.Builder(this);
+			TimetableErrorType errorType = TimetableErrorType.GENERAL;
+
+			if (b != null) {
+				builder.setMessage(b.getString(KEY_DIALOG_ERROR_MSG));
+				errorType = (TimetableErrorType) b
+						.getSerializable(KEY_DIALOG_ERROR_TYPE);
+			} else {
+				builder.setMessage(R.string.dialog_error_message);
+			}
+
+			builder.setTitle(R.string.dialog_error_title);
+			builder.setCancelable(false);
+			if (errorType == TimetableErrorType.FORMAT) {
+				builder.setNeutralButton(android.R.string.ok, new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						refreshItem.setVisible(true);
+						getSupportActionBar().setNavigationMode(
+								ActionBar.NAVIGATION_MODE_STANDARD);
+						subjectFragment.setInitalState();
+						setSupportProgressBarIndeterminateVisibility(false);
+
+						removeDialog(ERROR_DIALOG);
+					}
+					
+				});
+			} else if (errorType == TimetableErrorType.UNKNOWN_TIMETABLE) {
+				builder.setPositiveButton(android.R.string.yes,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								refreshItem.setVisible(true);
+								getSupportActionBar().setNavigationMode(
+										ActionBar.NAVIGATION_MODE_STANDARD);
+								subjectFragment.setInitalState();
+								setSupportProgressBarIndeterminateVisibility(false);
+
+								removeDialog(ERROR_DIALOG);
+								
+								Intent i = new Intent(TimetableActivity.this, PreferenceActivity_.class);
+								startActivityForResult(i, PREFERENCE_REQUEST);
+							}
+						});
+				builder.setNegativeButton(android.R.string.no,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								refreshItem.setVisible(true);
+								getSupportActionBar().setNavigationMode(
+										ActionBar.NAVIGATION_MODE_STANDARD);
+								subjectFragment.setInitalState();
+								setSupportProgressBarIndeterminateVisibility(false);
+
+								removeDialog(ERROR_DIALOG);
+							}
+						});
+			} else {
+				builder.setPositiveButton(android.R.string.yes,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								Parser parser = new Parser(
+										TimetableActivity.this,
+										resultPassedListener);
+								parser.execute();
+								
+								removeDialog(ERROR_DIALOG);
+							}
+						});
+				builder.setNegativeButton(android.R.string.no,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								refreshItem.setVisible(true);
+								getSupportActionBar().setNavigationMode(
+										ActionBar.NAVIGATION_MODE_STANDARD);
+								subjectFragment.setInitalState();
+								setSupportProgressBarIndeterminateVisibility(false);
+
+								removeDialog(ERROR_DIALOG);
+							}
+						});
+			}
+			
+			return builder.create();
+		default:
+			return super.onCreateDialog(id, b);
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -203,37 +316,6 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		AlertDialog.Builder builder;
 
 		switch (id) {
-		case ERROR_DIALOG:
-			builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.dialog_error_message);
-			builder.setTitle(R.string.dialog_error_title);
-			builder.setCancelable(false);
-			builder.setPositiveButton(android.R.string.yes,
-					new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							Parser parser = new Parser(TimetableActivity.this,
-									resultPassedListener);
-							parser.execute();
-						}
-					});
-			builder.setNegativeButton(android.R.string.no,
-					new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							refreshItem.setVisible(true);
-							getSupportActionBar().setNavigationMode(
-									ActionBar.NAVIGATION_MODE_STANDARD);
-							subjectFragment.setInitalState();
-							setSupportProgressBarIndeterminateVisibility(false);
-
-							dialog.cancel();
-
-						}
-					});
-			return builder.create();
 		case NEW_TIMETABLEPLAN:
 			builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.dialog_new_message);
@@ -400,8 +482,8 @@ public class TimetableActivity extends SherlockFragmentActivity {
 				"[Feedback]HWR Berlin Stundenplanapp");
 
 		String myBodyText = "Vorname: \r\n" + "Nachname: \r\n"
-				+ "Mailadresse: \r\n" + "Gerät: \r\n" + "Android-Version: \r\n"
-				+ "Fachkombination: \r\n\r\n"
+				+ "Mailadresse: \r\n" + "Gerät: \r\n"
+				+ "Android-Version: \r\n" + "Fachkombination: \r\n\r\n"
 				+ "Bewertung: X von 5 Sternen \r\n" + "Bug: \r\n"
 				+ "Verbesserungsvorschläge: \r\n\r\n"
 				+ "Vielen Dank für dein Feedback!\r\n" + "Marc Prengemann";
@@ -422,15 +504,8 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			List<Subjects> allSubjects = new ArrayList<Subjects>();
 
 			@Override
-			public void onError(final OnLoadingListener listener) {
-				resultPassedListener = listener;
-				dialog.dismiss();
-				showDialog(ERROR_DIALOG);
-			}
-
-			@Override
-			public void onLoadingFinished(boolean hasError) {
-				if (!hasError) {
+			public void onLoadingFinished(TimetableException exception) {
+				if (exception == null) {
 					Calendar calendar = GregorianCalendar.getInstance();
 
 					Editor edit = prefs.edit();
@@ -484,7 +559,16 @@ public class TimetableActivity extends SherlockFragmentActivity {
 						dialog.dismiss();
 					}
 				} else {
+					resultPassedListener = this;
 					dialog.dismiss();
+
+					Bundle dialogInput = new Bundle();
+					dialogInput.putString(KEY_DIALOG_ERROR_MSG,
+							exception.getMessage());
+					dialogInput.putSerializable(KEY_DIALOG_ERROR_TYPE,
+							exception.getType());
+					
+					showDialog(ERROR_DIALOG, dialogInput);
 				}
 
 				refreshItem.setVisible(true);

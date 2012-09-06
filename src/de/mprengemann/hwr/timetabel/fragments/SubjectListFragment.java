@@ -131,11 +131,13 @@ public class SubjectListFragment extends SherlockFragment {
 			@Override
 			public void onLoadingStarted() {
 				Log.i(TAG, "Start!!");
-
-				getSherlockActivity().setSupportProgress(Window.PROGRESS_END);
+				
 				mAdapter.setLoading(true);
-				getSherlockActivity()
-						.setSupportProgressBarIndeterminateVisibility(true);
+				
+				if (getSherlockActivity() != null){
+					getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
+					getSherlockActivity().setSupportProgress(Window.PROGRESS_END);
+				}				
 			}
 
 		});

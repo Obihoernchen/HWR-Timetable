@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!-- Copyright 2012 Marc Prengemann
+<!--
+Copyright 2012 Marc Prengemann
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,33 +12,31 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License. -->
+limitations under the License.
+-->
 
-<resources>    
+<resources>
+
     <string name="app_name">HWR Berlin Stundenplan</string>
     <string name="bugtracking_api">a7cb362b</string>
-    
+
     <!-- PREFERENCES -->
     <string name="prefs_cal_sync_Key">prefs_cal_sync</string>
     <string name="prefs_cal_Key">prefs_cal</string>
     <string name="prefs_cal_force_sync_Key">prefs_cal_force</string>
     <string name="prefs_cal_export_Key">prefs_cal_exp</string>
-        
-    <string name="prefs_proxyFlagKey">prefs_proxyFlag</string>    
+    <string name="prefs_proxyFlagKey">prefs_proxyFlag</string>
     <string name="prefs_proxyKey">prefs_proxy</string>
     <string name="prefs_proxyPortKey">prefs_proxyPort</string>
-    
     <string name="prefs_matrikelNrKey">prefs_matr</string>
     <string name="prefs_fachrichtungKey">prefs_fachrichtung</string>
     <string name="prefs_semesterKey">prefs_semester</string>
     <string name="prefs_kursKey">prefs_kurs</string>
-    
     <string name="prefs_notifyKey">prefs_notify</string>
     <string name="prefs_showInPastKey">prefs_pastDuration</string>
     <string name="prefs_lastUpdated">prefs_lastUpdated</string>
     <string name="prefs_lastUpdated_user">prefs_lastUpdated_user</string>
     <string name="prefs_feedbackKey">prefs_feedbackKey</string>
-    
     <string name="text_prefs_matrikelNr_title">Matrikelnummer</string>
     <string name="text_prefs_fachrichtung_summary">Welche Fachrichtung belegst du?</string>
     <string name="text_prefs_fachrichtung_title">Fachrichtung</string>
@@ -48,26 +46,23 @@ limitations under the License. -->
     <string name="text_prefs_kurs_title">Kurs</string>
     <string name="text_prefs_lastUpdated">Letzte Synchronisierung:</string>
     <string name="text_prefs_lastUpdated_never">noch nie aktualisiert</string>
-    
     <string name="text_prefs_category_connections_title">Verbindungseinstellungen</string>
     <string name="text_prefs_proxyFlag_summary">Standardmäßig ist der Proxy der HWR Berlin vom Campus Lichtenberg hinterlegt!</string>
     <string name="text_prefs_proxyFlag_title">Proxy verwenden</string>
     <string name="text_prefs_proxy_title">Proxy</string>
     <string name="text_prefs_proxy_port_title">Port</string>
-    
     <string name="text_prefs_category_calendar_title">Kalender (ab Android 4.0)</string>
     <string name="text_prefs_cal_sync_title">Synchronisierung</string>
     <string name="text_prefs_cal_sync_summary">Achtung: Vom gewählten Kalender wird bei jeder Synchronisierung der gesamte Inhalt überschrieben.</string>
     <string name="text_prefs_cal_title">Kalender wählen</string>
     <string name="text_prefs_cal_force_sync_title">Synchronisierung erzwingen</string>
     <string name="text_prefs_cal_export_title">Kalender exportieren</string>
-    
     <string name="text_prefs_category_others_title">Sonstiges</string>
     <string name="text_prefs_notify_summary">Beim Start auf neue Version des Stundenplans überprüfen</string>
     <string name="text_prefs_notify_title">Stundenplanbenachrichtigung</string>
     <string name="text_prefs_showInPast_summary">Bis zu welcher Zeit sollen Einträge aus der Vergangenheit angezeigt werden? (Format HH:MM)</string>
-    <string name="text_prefs_showInPast_title">Vergangenheitsdauer</string>    
-    
+    <string name="text_prefs_showInPast_title">Vergangenheitsdauer</string>
+
     <!-- MENU -->
     <string name="menu_refresh">Aktualisieren</string>
     <string name="menu_group">Weiteres</string>
@@ -77,7 +72,7 @@ limitations under the License. -->
     <string name="menu_license">Lizenzhinweise</string>
     <string name="menu_feedback">Feedback</string>
     <string name="menu_detail">Detailansicht</string>
-    
+
     <!-- SUBJECTLIST -->
     <string name="text_please_wait">Bitte warten ..</string>
     <string name="text_today">Heute</string>
@@ -88,12 +83,16 @@ limitations under the License. -->
     <string name="text_no_subjects">Ihr Stundenplan enthält keine Termine.\n\nBitte sychronisieren Sie!</string>
     <string name="intent_data_preferences_changed">prefs_indicator_isChanged</string>
     <string name="intent_data_refresh_history">prefs_indicator_refreshHistory</string>
-        
+
     <!-- DIALOG -->
     <string name="dialog_new_message">Es ist ein neuer Stundenplan verfügbar.\nMöchten Sie aktualisieren?</string>
     <string name="dialog_new_title">Aktualisierung</string>
     <string name="dialog_error_title">Fehler</string>
     <string name="dialog_error_message">Konnte keine Verbindung herstellen!\r\nErneut versuchen?</string>
+    <string name="dialog_error_message_timeout">Zeitüberschreitung beim Warten auf Antwort vom iPool!\r\nErneut versuchen?</string>
+    <string name="dialog_error_message_timetable">Die gewünschte Kombination des Stundenplans ist nicht verfügbar.\r\nÄndern?</string>
+    <string name="dialog_error_message_storage">Es ist ein Fehler beim Speichern der Daten aufgetreten.\r\nErneut versuchen?</string>
+    <string name="dialog_error_message_ipool">Die Formatierung im iPool wurde verändert. Dieses Problem wir schnellstmöglich durch den Entwickler behoben.</string>
     <string name="dialog_sync_title">Synchronisierung</string>
     <string name="dialog_sync_msg">Bitte warten ..</string>
     <string name="dialog_export_title">Kalender-Export</string>
@@ -101,16 +100,17 @@ limitations under the License. -->
     <string name="dialog_export_success">Kalender erfolgereich exportiert nach</string>
     <string name="dialog_export_error">Ein Fehler ist aufgetreteten. Bitte probieren Sie es erneut!</string>
     <string name="dialog_donate">Vielen Dank für deine Spende!</string>
-    
+
     <!-- SUBJECT_CHOOSER -->
     <string name="text_subject_chooser_title">Modulauswahl</string>
-    
+
     <!-- CALENDAR_CHOOSER -->
     <string name="text_calendar_chooser_title">Kalenderauswahl</string>
-    
+
     <!-- LICENSE -->
     <string name="text_license"><b>Third-party licenses</b>\n\nThis app uses the following third party party:\n\n\t- <a href="https://github.com/JakeWharton/ActionBarSherlock">ActionBarSherlock</a>\n\t- <a href="https://github.com/JakeWharton/Android-ViewPagerIndicator">ViewPagerIndicator</a>\n\t- <a href="http://m2.modularity.net.au/projects/ical4j/license.html">iCal4j</a>\n\t- <a href="http://greendao-orm.com/">greenDAO</a>\n\t- <a href="https://github.com/excilys/androidannotations">AndroidAnnotations</a>\n\t- <a href="http://backport-jsr166.sourceforge.net/">backport-util-concurrent</a>\n\n==================\n iCal4j - License\n==================\n\nCopyright &#169; 2011, Ben Fortuna\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n\to Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n\n\to Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n\n\to Neither the name of Ben Fortuna nor the names of any other contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</string>
-    
+
     <!-- WIDGET -->
     <string name="text_widget_no_entrys">Keine weiteren Termine für heute vorhanden.</string>
+
 </resources>

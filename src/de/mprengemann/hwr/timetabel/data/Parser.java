@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.PropertyList;
 
@@ -37,6 +38,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -55,15 +57,29 @@ import com.bugsense.trace.BugSenseHandler;
 import de.mprengemann.hwr.timetabel.Events;
 import de.mprengemann.hwr.timetabel.R;
 import de.mprengemann.hwr.timetabel.Subjects;
+import de.mprengemann.hwr.timetabel.exceptions.ConnectionException;
+import de.mprengemann.hwr.timetabel.exceptions.ConnectionTimeoutException;
+import de.mprengemann.hwr.timetabel.exceptions.IPoolFormatException;
+import de.mprengemann.hwr.timetabel.exceptions.StorageException;
+import de.mprengemann.hwr.timetabel.exceptions.TimetableException;
+import de.mprengemann.hwr.timetabel.exceptions.UnknownTimetableException;
 import de.mprengemann.hwr.timetabel.icsparser.IcsParser;
 import de.mprengemann.hwr.timetabel.icsparser.IcsParser.OnCalendarParsingListener;
 
 public class Parser extends AsyncTask<Void, Void, Void> {
 
+	private static final String META_URL = "metadata_url";
+	private static final String META_EVENT = "metadata_event";
+	private static final String META_SUBJECT = "metadata_subject";
+	private static final String META_KURS = "metadata_kurs";
+	private static final String META_SEMESTER = "metadata_semester";
+	private static final String META_FACHRICHTUNG = "metadata_fachrichtung";
+
 	public interface OnLoadingListener {
-		void onError(OnLoadingListener listener);
-		void onLoadingFinished(boolean hasError);
+		void onLoadingFinished(TimetableException e);
+
 		void onLoadingStarted(String msg);
+
 		void onNewItem(Subjects s, Events evt);
 	}
 
@@ -71,7 +87,8 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 	public OnLoadingListener listener;
 
 	private Context context;
-	private boolean connectionAvail = true;
+	private TimetableException exception = null;
+
 	private SharedPreferences preferences;
 
 	public Parser(Context context, OnLoadingListener listener) {
@@ -79,19 +96,16 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 		this.preferences = PreferenceManager
 				.getDefaultSharedPreferences(context);
 		this.listener = listener;
+		this.exception = null;
 	}
 
 	protected Void doInBackground(Void... params) {
+		this.exception = null;
+
 		if (Utils.connectionChecker(context)) {
 			try {
 				final String matrikelnr = preferences.getString(
 						context.getString(R.string.prefs_matrikelNrKey), "");
-				final String fachrichtung = preferences.getString(
-						context.getString(R.string.prefs_fachrichtungKey), "1");
-				final String semester = preferences.getString(
-						context.getString(R.string.prefs_semesterKey), "1");
-				final String kurs = preferences.getString(
-						context.getString(R.string.prefs_kursKey), "1");
 
 				DefaultHttpClient httpclient = new DefaultHttpClient();
 				if (preferences.getBoolean(
@@ -153,7 +167,6 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 					is = c.getInputStream();
 
 					if (is != null) {
-
 						try {
 							new IcsParser(is, new OnCalendarParsingListener() {
 
@@ -183,17 +196,11 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 													.getValue()
 													.replace("T", " ")));
 										} catch (ParseException e) {
-											Log.e(TAG,
-													"Error while parsing date");
-											Map<String, String> extraData = new HashMap<String,String>();
-										    extraData.put("url", url.toString());
-										    extraData.put("matrikelnr", matrikelnr);
-										    extraData.put("fachrichtung", fachrichtung);
-										    extraData.put("semester", semester);
-										    extraData.put("kurs", kurs);
-											
-											BugSenseHandler.log(TAG, extraData, e);
+											exception = new IPoolFormatException(
+													context.getString(R.string.dialog_error_message_ipool));
+											sendBugReport(e, url.toString());
 										}
+
 										evt.setRoom(p.getProperty("LOCATION")
 												.getValue());
 										evt.setUid(p.getProperty("UID")
@@ -208,103 +215,128 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 														"Dozent: ", ""));
 												break;
 											} else if (desc.startsWith("Art: ")) {
-												evt.setType(desc.replace("Art: ",
-														""));
+												evt.setType(desc.replace(
+														"Art: ", ""));
 											}
 										}
-										try{
+										try {
 											listener.onNewItem(s, evt);
-										}catch (Exception e){
-											connectionAvail = false;
-											Log.e(TAG, e.toString());
-											
-											Map<String, String> extraData = new HashMap<String,String>();
-										    extraData.put("url", url.toString());
-										    extraData.put("matrikelnr", matrikelnr);
-										    extraData.put("fachrichtung", fachrichtung);
-										    extraData.put("semester", semester);
-										    extraData.put("kurs", kurs);
-										    extraData.put("Subject", s.toString());
-										    extraData.put("Event", evt.toString());
-											
-											BugSenseHandler.log(TAG, extraData, e);
+										} catch (SQLiteConstraintException e) {
+											exception = new StorageException(
+													context.getString(R.string.dialog_error_message_storage));
+											sendBugReport(e, url.toString(),
+													s.toString(),
+													evt.toString());
 										}
-										
+
 									}
 								}
-
 							});
-						} catch (Exception e) {
-							connectionAvail = false;
-							Log.e(TAG, e.toString());
-							
-							Map<String, String> extraData = new HashMap<String,String>();
-						    extraData.put("url", url.toString());
-						    extraData.put("matrikelnr", matrikelnr);
-						    extraData.put("fachrichtung", fachrichtung);
-						    extraData.put("semester", semester);
-						    extraData.put("kurs", kurs);
-							
-							BugSenseHandler.log(TAG, extraData, e);
+						} catch (ParserException e) {
+							exception = new UnknownTimetableException(
+									context.getString(R.string.dialog_error_message_timetable));
+							sendBugReport(e);
+						} catch (IOException e) {
+							exception = new ConnectionException(
+									context.getString(R.string.dialog_error_message));
+							sendBugReport(e);
 						}
 					} else {
-						connectionAvail = false;
+						throw new IOException();
 					}
-				} catch (MalformedURLException e) {
-					connectionAvail = false;
-					Log.e(TAG, e.toString());
-					Map<String, String> extraData = new HashMap<String,String>();
-				    extraData.put("matrikelnr", matrikelnr);
-				    extraData.put("fachrichtung", fachrichtung);
-				    extraData.put("semester", semester);
-				    extraData.put("kurs", kurs);
-					
-					BugSenseHandler.log(TAG, extraData, e);
 				} catch (IOException e) {
-					connectionAvail = false;
-					Log.e(TAG, e.toString());
-					Map<String, String> extraData = new HashMap<String,String>();
-				    extraData.put("matrikelnr", matrikelnr);
-				    extraData.put("fachrichtung", fachrichtung);
-				    extraData.put("semester", semester);
-				    extraData.put("kurs", kurs);
-					
-					BugSenseHandler.log(TAG, extraData, e);
+					if (e instanceof ConnectTimeoutException) {
+						exception = new ConnectionTimeoutException(
+								context.getString(R.string.dialog_error_message_timeout));
+					} else if (e instanceof MalformedURLException) {
+						exception = new ConnectionException(
+								context.getString(R.string.dialog_error_message));
+					} else {
+						exception = new ConnectionException(
+								context.getString(R.string.dialog_error_message));
+						sendBugReport(e);
+					}
 				} finally {
 					try {
-						is.close();
+						if (is != null) {
+							is.close();
+						}
 					} catch (IOException e) {
-						connectionAvail = false;
-						Log.e(TAG, e.toString());
-						Map<String, String> extraData = new HashMap<String,String>();
-					    extraData.put("matrikelnr", matrikelnr);
-					    extraData.put("fachrichtung", fachrichtung);
-					    extraData.put("semester", semester);
-					    extraData.put("kurs", kurs);
-						
-						BugSenseHandler.log(TAG, extraData, e);
+						if (e instanceof ConnectTimeoutException) {
+							exception = new ConnectionTimeoutException(
+									context.getString(R.string.dialog_error_message_timeout));
+						} else {
+							exception = new ConnectionException(
+									context.getString(R.string.dialog_error_message));
+							sendBugReport(e);
+						}
+
 					}
 				}
 
 				httpclient.getConnectionManager().shutdown();
 			} catch (Exception e) {
-				connectionAvail = false;
-				Log.e(TAG, e.toString());
-				BugSenseHandler.log(TAG, e);
+				if (e instanceof ConnectTimeoutException) {
+					exception = new ConnectionTimeoutException(
+							context.getString(R.string.dialog_error_message_timeout));
+				} else {
+					exception = new ConnectionException(
+							context.getString(R.string.dialog_error_message));
+					sendBugReport(e);
+				}
+
 			}
+		} else {
+			exception = new ConnectionException(
+					context.getString(R.string.dialog_error_message));
 		}
+
 		return null;
 	}
 
 	protected void onPostExecute(Void result) {
-		if (!connectionAvail) {
-			listener.onError(listener);
-		} else {
-			listener.onLoadingFinished(!connectionAvail);
-		}
+		listener.onLoadingFinished(exception);
 	}
 
 	protected void onPreExecute() {
+		exception = null;
 		listener.onLoadingStarted("");
+	}
+
+	private void sendBugReport(Exception e, Map<String, String> extraData) {
+		final String fachrichtung = preferences.getString(
+				context.getString(R.string.prefs_fachrichtungKey), "1");
+		final String semester = preferences.getString(
+				context.getString(R.string.prefs_semesterKey), "1");
+		final String kurs = preferences.getString(
+				context.getString(R.string.prefs_kursKey), "1");
+
+		extraData.put(META_FACHRICHTUNG, fachrichtung);
+		extraData.put(META_SEMESTER, semester);
+		extraData.put(META_KURS, kurs);
+
+		BugSenseHandler.log(TAG, extraData, e);
+	}
+
+	private void sendBugReport(Exception e) {
+		sendBugReport(e, new HashMap<String, String>());
+	}
+
+	private void sendBugReport(Exception e, String url, String subject,
+			String event) {
+
+		Map<String, String> extraData = new HashMap<String, String>();
+		extraData.put(META_URL, url);
+		extraData.put(META_SUBJECT, subject);
+		extraData.put(META_EVENT, event);
+
+		sendBugReport(e, extraData);
+	}
+
+	private void sendBugReport(Exception e, String url) {
+		Map<String, String> extraData = new HashMap<String, String>();
+		extraData.put(META_URL, url);
+
+		sendBugReport(e, extraData);
 	}
 }

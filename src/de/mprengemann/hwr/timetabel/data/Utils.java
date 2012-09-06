@@ -99,7 +99,6 @@ public class Utils {
 			connected = connec.getActiveNetworkInfo().isConnected();
 		} catch (Exception e) {
 			connected = false;
-			BugSenseHandler.log(TAG, e);
 		}
 
 		return connected;
