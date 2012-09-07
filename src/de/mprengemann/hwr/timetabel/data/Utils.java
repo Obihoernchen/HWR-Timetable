@@ -50,9 +50,9 @@ public class Utils {
 			// Versicherung
 			if (fachrichtung == 14) {
 				course = semester + 1;
-			// Tourismus
+				// Tourismus
 			} else if (fachrichtung == 13) {
-				if (semester > 1){
+				if (semester > 1) {
 					course = semester + 1;
 				} else {
 					course = semester - 1;
@@ -66,7 +66,7 @@ public class Utils {
 			// Spedition/Logistik oder Versicherung
 			if ((fachrichtung == 11) || (fachrichtung == 14)) {
 				course = (semester - 1) * 2;
-			} else if (fachrichtung == 13){
+			} else if (fachrichtung == 13) {
 				course = (semester - 1) * 2 + 1;
 			} else {
 				course = (semester - 1) * 3;
@@ -76,7 +76,7 @@ public class Utils {
 			// Spedition/Logistik oder Versicherung
 			if ((fachrichtung == 11) || (fachrichtung == 14)) {
 				course = (semester - 1) * 2 + 1;
-			} else if (fachrichtung == 13){
+			} else if (fachrichtung == 13) {
 				course = (semester - 1) * 3 + 2;
 			} else {
 				course = (semester - 1) * 3 + 1;

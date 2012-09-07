@@ -47,6 +47,7 @@ public class SubjectChooserFragment extends SherlockDialogFragment {
 
 		return f;
 	}
+
 	private OnSubmitListener listener;
 
 	private HashMap<Long, Boolean> changed = new HashMap<Long, Boolean>();

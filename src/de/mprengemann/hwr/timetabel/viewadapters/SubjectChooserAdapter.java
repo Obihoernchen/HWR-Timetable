@@ -93,10 +93,10 @@ public class SubjectChooserAdapter extends BaseAdapter {
 				holder.checkView.setText(item.getTitle());
 			} catch (Exception e) {
 				Log.e(TAG, String.valueOf(item.getId()));
-				Map<String, String> extraData = new HashMap<String,String>();
-			    extraData.put("itemid", String.valueOf(item.getId()));
-				
-				BugSenseHandler.log(TAG, extraData, e);
+				HashMap<String, String> extraData = new HashMap<String, String>();
+				extraData.put("itemid", String.valueOf(item.getId()));
+
+				BugSenseHandler.sendExceptionMap(extraData, e);
 			}
 
 			if (changed.contains(Long.valueOf(item.getId()))) {

@@ -38,9 +38,11 @@ public class WidgetServiceStatic extends Service {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "WidgetServiceStatic";
-	
-	private final SimpleDateFormat df_day = new SimpleDateFormat("EEEEEEEEEE", Locale.GERMANY);
-	private final SimpleDateFormat df_date = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
+
+	private final SimpleDateFormat df_day = new SimpleDateFormat("EEEEEEEEEE",
+			Locale.GERMANY);
+	private final SimpleDateFormat df_date = new SimpleDateFormat("dd.MM.yyyy",
+			Locale.GERMANY);
 
 	private TimetableApplication_ application;
 	private DateFormat df = new SimpleDateFormat("HH:mm");;

@@ -24,6 +24,7 @@ import com.googlecode.androidannotations.annotations.EActivity;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.viewpagerindicator.TitlePageIndicator.IndicatorStyle;
 
+import de.mprengemann.hwr.timetabel.fragments.SubjectDetailFragment;
 import de.mprengemann.hwr.timetabel.fragments.SubjectDetailFragment_;
 import de.mprengemann.hwr.timetabel.fragments.viewpager.SubjectDetailFragmentAdapter;
 
@@ -32,7 +33,7 @@ public class SubjectDetailActivity extends SherlockFragmentActivity {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "SubjectDetailActivity";
-	
+
 	private TimetableApplication application;
 
 	@Override
@@ -46,8 +47,8 @@ public class SubjectDetailActivity extends SherlockFragmentActivity {
 		Bundle b;
 
 		if ((b = getIntent().getExtras()) != null) {
-			evt_id = b.getLong(SubjectDetailFragment_.EXTRA_EVENT_ID, -1);
-			sub_id = b.getLong(SubjectDetailFragment_.EXTRA_SUBJECT_ID, -1);
+			evt_id = b.getLong(SubjectDetailFragment.EXTRA_EVENT_ID, -1);
+			sub_id = b.getLong(SubjectDetailFragment.EXTRA_SUBJECT_ID, -1);
 		}
 
 		setContentView(R.layout.fragment_subject_detail_pager);

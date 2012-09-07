@@ -330,16 +330,16 @@ public class CalendarUtils {
 						+ file.getAbsolutePath();
 			} catch (SocketException e) {
 				Log.e(TAG, e.toString());
-				BugSenseHandler.log(TAG, e);
+				BugSenseHandler.sendException(e);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, e.toString());
-				BugSenseHandler.log(TAG, e);
+				BugSenseHandler.sendException(e);
 			} catch (IOException e) {
 				Log.e(TAG, e.toString());
-				BugSenseHandler.log(TAG, e);
+				BugSenseHandler.sendException(e);
 			} catch (ValidationException e) {
 				Log.e(TAG, e.toString());
-				BugSenseHandler.log(TAG, e);
+				BugSenseHandler.sendException(e);
 			}
 
 			return context.getString(R.string.dialog_export_error);

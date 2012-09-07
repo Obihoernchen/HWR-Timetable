@@ -52,6 +52,7 @@ public class SubjectsAdapter extends BaseAdapter {
 		TextView roomView;
 		TextView seperatorView;
 	}
+
 	private OnDataChangeListener listener;
 	public final static long SECOND_MILLIS = 1000;
 	public final static long MINUTE_MILLIS = SECOND_MILLIS * 60;
@@ -68,7 +69,8 @@ public class SubjectsAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
 
 	private SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.GERMANY);
-	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("EE, dd.MM.yyyy", Locale.GERMANY);
+	private SimpleDateFormat fullDateFormat = new SimpleDateFormat(
+			"EE, dd.MM.yyyy", Locale.GERMANY);
 	private HashMap<Integer, Events> mData = new HashMap<Integer, Events>();
 	private HashMap<Integer, String> mSeparatorsSet = new HashMap<Integer, String>();
 
@@ -252,11 +254,13 @@ public class SubjectsAdapter extends BaseAdapter {
 					holder.titleView.setText(item.getSubjects().getTitle());
 				} catch (Exception e) {
 					Log.e(TAG, item.getSubjectId() + " " + item.getSubjects());
-					Map<String, String> extraData = new HashMap<String,String>();
-				    extraData.put("subjectsid", String.valueOf(item.getSubjectId()));
-				    extraData.put("subjects", String.valueOf(item.getSubjects()));
-				    
-					BugSenseHandler.log(TAG, extraData, e);
+					HashMap<String, String> extraData = new HashMap<String, String>();
+					extraData.put("subjectsid",
+							String.valueOf(item.getSubjectId()));
+					extraData.put("subjects",
+							String.valueOf(item.getSubjects()));
+
+					BugSenseHandler.sendExceptionMap(extraData, e);
 				}
 
 				holder.roomView.setText(item.getRoom());
@@ -290,7 +294,7 @@ public class SubjectsAdapter extends BaseAdapter {
 				}
 			} catch (Exception e) {
 				holder.seperatorView.setText(getSeperatorItem(position));
-				BugSenseHandler.log(TAG, e);
+				BugSenseHandler.sendException(e);
 			}
 
 		}

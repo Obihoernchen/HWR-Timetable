@@ -93,6 +93,7 @@ limitations under the License.
     <string name="dialog_error_message_timetable">Die gewünschte Kombination des Stundenplans ist nicht verfügbar.\r\nÄndern?</string>
     <string name="dialog_error_message_storage">Es ist ein Fehler beim Speichern der Daten aufgetreten.\r\nErneut versuchen?</string>
     <string name="dialog_error_message_ipool">Die Formatierung im iPool wurde verändert. Dieses Problem wir schnellstmöglich durch den Entwickler behoben.</string>
+    <string name="dialog_error_message_auth">Die Authentifizierung am iPool ist fehlgeschlagen. Bitte überprüfen Sie Ihre Matrikel-Nummer und versuchen Sie es dann erneut.\r\bÜberprüfen?</string>
     <string name="dialog_sync_title">Synchronisierung</string>
     <string name="dialog_sync_msg">Bitte warten ..</string>
     <string name="dialog_export_title">Kalender-Export</string>

@@ -39,6 +39,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -50,13 +51,13 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteConstraintException;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.bugsense.trace.BugSenseHandler;
 
 import de.mprengemann.hwr.timetabel.Events;
 import de.mprengemann.hwr.timetabel.R;
 import de.mprengemann.hwr.timetabel.Subjects;
+import de.mprengemann.hwr.timetabel.exceptions.ConnectionAuthentificationException;
 import de.mprengemann.hwr.timetabel.exceptions.ConnectionException;
 import de.mprengemann.hwr.timetabel.exceptions.ConnectionTimeoutException;
 import de.mprengemann.hwr.timetabel.exceptions.IPoolFormatException;
@@ -161,10 +162,15 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 					url = new URL(Utils.buildURL(context, preferences));
 					URLConnection c = url.openConnection();
 
-					c.setRequestProperty("Cookie", cookies.get(0).getName()
-							+ "=" + cookies.get(0).getValue());
-					c.connect();
-					is = c.getInputStream();
+					try {
+						c.setRequestProperty("Cookie", cookies.get(0).getName()
+								+ "=" + cookies.get(0).getValue());
+						c.connect();
+						is = c.getInputStream();
+					} catch (NullPointerException e) {
+						throw new ConnectionAuthentificationException(
+								context.getString(R.string.dialog_error_message_auth));
+					}
 
 					if (is != null) {
 						try {
@@ -237,13 +243,20 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 									context.getString(R.string.dialog_error_message_timetable));
 							sendBugReport(e);
 						} catch (IOException e) {
-							exception = new ConnectionException(
-									context.getString(R.string.dialog_error_message));
-							sendBugReport(e);
+							if (e instanceof HttpHostConnectException) {
+								exception = new ConnectionTimeoutException(
+										context.getString(R.string.dialog_error_message_timeout));
+							} else {
+								exception = new ConnectionException(
+										context.getString(R.string.dialog_error_message));
+								sendBugReport(e);
+							}
 						}
 					} else {
 						throw new IOException();
 					}
+				} catch (ConnectionAuthentificationException e) {
+					exception = e;
 				} catch (IOException e) {
 					if (e instanceof ConnectTimeoutException) {
 						exception = new ConnectionTimeoutException(
@@ -303,7 +316,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 		listener.onLoadingStarted("");
 	}
 
-	private void sendBugReport(Exception e, Map<String, String> extraData) {
+	private void sendBugReport(Exception e, HashMap<String, String> extraData) {
 		final String fachrichtung = preferences.getString(
 				context.getString(R.string.prefs_fachrichtungKey), "1");
 		final String semester = preferences.getString(
@@ -315,7 +328,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 		extraData.put(META_SEMESTER, semester);
 		extraData.put(META_KURS, kurs);
 
-		BugSenseHandler.log(TAG, extraData, e);
+		BugSenseHandler.sendExceptionMap(extraData, e);
 	}
 
 	private void sendBugReport(Exception e) {
@@ -325,7 +338,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 	private void sendBugReport(Exception e, String url, String subject,
 			String event) {
 
-		Map<String, String> extraData = new HashMap<String, String>();
+		HashMap<String, String> extraData = new HashMap<String, String>();
 		extraData.put(META_URL, url);
 		extraData.put(META_SUBJECT, subject);
 		extraData.put(META_EVENT, event);
@@ -334,7 +347,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 	}
 
 	private void sendBugReport(Exception e, String url) {
-		Map<String, String> extraData = new HashMap<String, String>();
+		HashMap<String, String> extraData = new HashMap<String, String>();
 		extraData.put(META_URL, url);
 
 		sendBugReport(e, extraData);

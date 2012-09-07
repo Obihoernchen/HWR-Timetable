@@ -54,6 +54,7 @@ public class SubjectListFragment extends SherlockFragment {
 		SubjectListFragment_ f = new SubjectListFragment_();
 		return f;
 	}
+
 	@ViewById(R.id.list_subjects)
 	ListView listView;
 	@ViewById(R.id.text_subjects_empty)
@@ -131,13 +132,15 @@ public class SubjectListFragment extends SherlockFragment {
 			@Override
 			public void onLoadingStarted() {
 				Log.i(TAG, "Start!!");
-				
+
 				mAdapter.setLoading(true);
-				
-				if (getSherlockActivity() != null){
-					getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
-					getSherlockActivity().setSupportProgress(Window.PROGRESS_END);
-				}				
+
+				if (getSherlockActivity() != null) {
+					getSherlockActivity()
+							.setSupportProgressBarIndeterminateVisibility(true);
+					getSherlockActivity().setSupportProgress(
+							Window.PROGRESS_END);
+				}
 			}
 
 		});

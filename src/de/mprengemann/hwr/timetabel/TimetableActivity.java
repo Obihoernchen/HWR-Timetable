@@ -59,8 +59,10 @@ import de.mprengemann.hwr.timetabel.data.Parser.OnLoadingListener;
 import de.mprengemann.hwr.timetabel.data.Utils;
 import de.mprengemann.hwr.timetabel.exceptions.TimetableException;
 import de.mprengemann.hwr.timetabel.exceptions.TimetableException.TimetableErrorType;
+import de.mprengemann.hwr.timetabel.fragments.SubjectChooserFragment;
 import de.mprengemann.hwr.timetabel.fragments.SubjectChooserFragment.OnSubmitListener;
 import de.mprengemann.hwr.timetabel.fragments.SubjectChooserFragment_;
+import de.mprengemann.hwr.timetabel.fragments.SubjectDetailFragment;
 import de.mprengemann.hwr.timetabel.fragments.SubjectDetailFragment_;
 import de.mprengemann.hwr.timetabel.fragments.SubjectListFragment;
 import de.mprengemann.hwr.timetabel.fragments.SubjectListFragment.OnItemClickListener;
@@ -69,10 +71,10 @@ import de.mprengemann.hwr.timetabel.fragments.SubjectListFragment.OnItemClickLis
 public class TimetableActivity extends SherlockFragmentActivity {
 
 	private static final String TAG = "TimetableActivity";
-	
+
 	private static final String KEY_DIALOG_ERROR_TYPE = "error_type";
 	private static final String KEY_DIALOG_ERROR_MSG = "msg";
-	
+
 	private static final int CONTENT_VIEW_ID = 1010101010;
 	private static final int PREFERENCE_REQUEST = 1212;
 	private static final int DONATE_REQUEST = 13131;
@@ -158,7 +160,8 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		super.onCreate(savedInstanceState);
 
-		BugSenseHandler.setup(this, getString(R.string.bugtracking_api));
+		BugSenseHandler.initAndStartSession(this,
+				getString(R.string.bugtracking_api));
 
 		FrameLayout frame = new FrameLayout(this);
 		frame.setId(CONTENT_VIEW_ID);
@@ -174,8 +177,8 @@ public class TimetableActivity extends SherlockFragmentActivity {
 				Intent i = new Intent(TimetableActivity.this,
 						SubjectDetailActivity_.class);
 
-				i.putExtra(SubjectDetailFragment_.EXTRA_EVENT_ID, event_id);
-				i.putExtra(SubjectDetailFragment_.EXTRA_SUBJECT_ID, subject_id);
+				i.putExtra(SubjectDetailFragment.EXTRA_EVENT_ID, event_id);
+				i.putExtra(SubjectDetailFragment.EXTRA_SUBJECT_ID, subject_id);
 
 				TimetableActivity.this.startActivity(i);
 			}
@@ -198,7 +201,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			startUpCheck();
 		} catch (Exception e) {
 			Log.e(TAG, "Can't show Dialog on startup check! " + e.getMessage());
-			BugSenseHandler.log(TAG, e);
+			BugSenseHandler.sendException(e);
 		}
 	}
 
@@ -223,21 +226,24 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			builder.setTitle(R.string.dialog_error_title);
 			builder.setCancelable(false);
 			if (errorType == TimetableErrorType.FORMAT) {
-				builder.setNeutralButton(android.R.string.ok, new OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						refreshItem.setVisible(true);
-						getSupportActionBar().setNavigationMode(
-								ActionBar.NAVIGATION_MODE_STANDARD);
-						subjectFragment.setInitalState();
-						setSupportProgressBarIndeterminateVisibility(false);
+				builder.setNeutralButton(android.R.string.ok,
+						new OnClickListener() {
 
-						removeDialog(ERROR_DIALOG);
-					}
-					
-				});
-			} else if (errorType == TimetableErrorType.UNKNOWN_TIMETABLE) {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								refreshItem.setVisible(true);
+								getSupportActionBar().setNavigationMode(
+										ActionBar.NAVIGATION_MODE_STANDARD);
+								subjectFragment.setInitalState();
+								setSupportProgressBarIndeterminateVisibility(false);
+
+								removeDialog(ERROR_DIALOG);
+							}
+
+						});
+			} else if (errorType == TimetableErrorType.UNKNOWN_TIMETABLE
+					|| errorType == TimetableErrorType.AUTHENTIFICATON) {
 				builder.setPositiveButton(android.R.string.yes,
 						new DialogInterface.OnClickListener() {
 
@@ -251,8 +257,9 @@ public class TimetableActivity extends SherlockFragmentActivity {
 								setSupportProgressBarIndeterminateVisibility(false);
 
 								removeDialog(ERROR_DIALOG);
-								
-								Intent i = new Intent(TimetableActivity.this, PreferenceActivity_.class);
+
+								Intent i = new Intent(TimetableActivity.this,
+										PreferenceActivity_.class);
 								startActivityForResult(i, PREFERENCE_REQUEST);
 							}
 						});
@@ -282,7 +289,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 										TimetableActivity.this,
 										resultPassedListener);
 								parser.execute();
-								
+
 								removeDialog(ERROR_DIALOG);
 							}
 						});
@@ -302,7 +309,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 							}
 						});
 			}
-			
+
 			return builder.create();
 		default:
 			return super.onCreateDialog(id, b);
@@ -421,7 +428,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			case R.id.menu_selection:
 				FragmentTransaction ft = getSupportFragmentManager()
 						.beginTransaction();
-				SubjectChooserFragment_ chooserFragment = SubjectChooserFragment_
+				SubjectChooserFragment_ chooserFragment = SubjectChooserFragment
 						.newInstance();
 				chooserFragment.setOnSubmitListener(new OnSubmitListener() {
 
@@ -506,7 +513,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 			@Override
 			public void onLoadingFinished(TimetableException exception) {
 				if (exception == null) {
-					Calendar calendar = GregorianCalendar.getInstance();
+					Calendar calendar = Calendar.getInstance();
 
 					Editor edit = prefs.edit();
 					edit.putLong(getString(R.string.prefs_lastUpdated_user),
@@ -567,7 +574,7 @@ public class TimetableActivity extends SherlockFragmentActivity {
 							exception.getMessage());
 					dialogInput.putSerializable(KEY_DIALOG_ERROR_TYPE,
 							exception.getType());
-					
+
 					showDialog(ERROR_DIALOG, dialogInput);
 				}
 

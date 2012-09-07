@@ -53,7 +53,7 @@ public class NewNotificationCheck {
 			this.lastChanged = date.getTime();
 		} catch (IOException e) {
 			Log.i(TAG, e.toString());
-			BugSenseHandler.log(TAG, e);
+			BugSenseHandler.sendException(e);
 		}
 	}
 

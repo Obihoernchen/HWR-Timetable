@@ -45,6 +45,7 @@ public class SubjectDetailFragment extends SherlockFragment {
 
 		public boolean onLongClick(long id);
 	}
+
 	@SuppressWarnings("unused")
 	private static final String TAG = "SubjectDetailFragment";
 	public static final String EXTRA_SUBJECT_ID = "ext_sub_detail_id";
@@ -68,6 +69,7 @@ public class SubjectDetailFragment extends SherlockFragment {
 
 	private static final SimpleDateFormat df_date = new SimpleDateFormat(
 			"dd.MM.yyyy");
+
 	public static SubjectDetailFragment_ newInstance(long subject_id,
 			long event_id) {
 		SubjectDetailFragment_ f = new SubjectDetailFragment_();
@@ -100,6 +102,7 @@ public class SubjectDetailFragment extends SherlockFragment {
 	ListView list;
 	@ViewById(R.id.text_subject_events_empty)
 	TextView empty;
+
 	@AfterViews
 	void initViews() {
 		if (mSubject != null) {

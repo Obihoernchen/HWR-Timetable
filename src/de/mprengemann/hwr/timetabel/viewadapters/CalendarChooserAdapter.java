@@ -120,10 +120,10 @@ public class CalendarChooserAdapter extends BaseAdapter {
 				holder.titleView.setText(item.getDisplayName());
 			} catch (Exception e) {
 				Log.e(TAG, String.valueOf(item.getId()));
-				Map<String, String> extraData = new HashMap<String,String>();
-			    extraData.put("itemid", String.valueOf(item.getId()));
-				
-				BugSenseHandler.log(TAG, extraData, e);
+				HashMap<String, String> extraData = new HashMap<String, String>();
+				extraData.put("itemid", String.valueOf(item.getId()));
+
+				BugSenseHandler.sendExceptionMap(extraData, e);
 			}
 
 			holder.titleView.setOnClickListener(new OnClickListener() {

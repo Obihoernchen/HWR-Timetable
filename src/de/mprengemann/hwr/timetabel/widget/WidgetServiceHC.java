@@ -54,7 +54,8 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 	private SparseArray<String> mSeparatorsSet = new SparseArray<String>();
 
 	private SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.GERMANY);
-	private SimpleDateFormat fullDateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY);
+	private SimpleDateFormat fullDateFormat = new SimpleDateFormat(
+			"dd.MM.yyyy", Locale.GERMANY);
 
 	public ListRemoteViewsFactory(Context context,
 			TimetableApplication_ application, Intent intent) {
@@ -190,7 +191,7 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 			} catch (Exception exp) {
 				rv.setTextViewText(R.id.txt_widget_separator,
 						getSeperatorItem(position));
-				BugSenseHandler.log(TAG, exp);
+				BugSenseHandler.sendException(exp);
 			}
 
 			break;

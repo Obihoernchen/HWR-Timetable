@@ -15,26 +15,28 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel.exceptions;
 
-public class IPoolFormatException extends TimetableException {
-	private static final long serialVersionUID = 4786981922310199924L;
+public class ConnectionAuthentificationException extends TimetableException {
 
-	public IPoolFormatException() {
-		super.errorType = TimetableErrorType.FORMAT;
+	private static final long serialVersionUID = -5534716321229141296L;
+
+	public ConnectionAuthentificationException() {
+		errorType = TimetableErrorType.AUTHENTIFICATON;
 	}
 
-	public IPoolFormatException(String detailMessage) {
+	public ConnectionAuthentificationException(String detailMessage) {
 		super(detailMessage);
-		super.errorType = TimetableErrorType.FORMAT;
+		errorType = TimetableErrorType.AUTHENTIFICATON;
 	}
 
-	public IPoolFormatException(Throwable throwable) {
+	public ConnectionAuthentificationException(Throwable throwable) {
 		super(throwable);
-		super.errorType = TimetableErrorType.FORMAT;
+		errorType = TimetableErrorType.AUTHENTIFICATON;
 	}
 
-	public IPoolFormatException(String detailMessage, Throwable throwable) {
+	public ConnectionAuthentificationException(String detailMessage,
+			Throwable throwable) {
 		super(detailMessage, throwable);
-		super.errorType = TimetableErrorType.FORMAT;
+		errorType = TimetableErrorType.AUTHENTIFICATON;
 	}
 
 }

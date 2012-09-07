@@ -58,7 +58,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "PreferenceActivity";
-	
+
 	private SharedPreferences prefs;
 	private boolean isChanged = false;
 	private boolean refreshHistory = false;
@@ -172,7 +172,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 												getString(R.string.prefs_default_showInPast))));
 							} catch (ParseException e) {
 								d.setTimeInMillis(DEFAULT_PAST);
-								BugSenseHandler.log(TAG, e);
+								BugSenseHandler.sendException(e);
 							}
 
 							TimePickerDialog dialog = new TimePickerDialog(
@@ -196,7 +196,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 											.get(Calendar.MINUTE), true);
 
 							dialog.setTitle(R.string.text_prefs_showInPast_title);
-							dialog.setButton(Dialog.BUTTON_NEGATIVE,
+							dialog.setButton(DialogInterface.BUTTON_NEGATIVE,
 									getString(android.R.string.cancel),
 									new OnClickListener() {
 
@@ -235,6 +235,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 								edit.commit();
 
 								mHandler.post(new Runnable() {
+									@Override
 									public void run() {
 										if (pref_sync_force != null) {
 											findPreference(
@@ -249,6 +250,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 								edit.commit();
 
 								mHandler.post(new Runnable() {
+									@Override
 									public void run() {
 										if (pref_sync_force != null) {
 											findPreference(
@@ -269,6 +271,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 		pref_sync_force = findPreference(getString(R.string.prefs_cal_force_sync_Key));
 		if (pref_sync_force != null) {
 			mHandler.post(new Runnable() {
+				@Override
 				public void run() {
 					if (prefs.getLong(getString(R.string.prefs_cal_Key), -1) == -1) {
 						pref_sync_force.setEnabled(false);

@@ -39,6 +39,7 @@ public class TimetableApplication extends Application {
 
 	public interface OnTimetableDataListener {
 		void onLoadingFinished(List<Events> result);
+
 		void onLoadingStarted();
 	}
 
@@ -81,7 +82,7 @@ public class TimetableApplication extends Application {
 					.getTime();
 		} catch (ParseException e) {
 			past = 1800000;
-			BugSenseHandler.log(TAG, e);
+			BugSenseHandler.sendException(e);
 		}
 
 		if (eventsDao != null) {
@@ -107,7 +108,7 @@ public class TimetableApplication extends Application {
 					.getTime();
 		} catch (ParseException e) {
 			past = 1800000;
-			BugSenseHandler.log(TAG, e);
+			BugSenseHandler.sendException(e);
 		}
 
 		if (eventsDao != null) {
@@ -136,7 +137,7 @@ public class TimetableApplication extends Application {
 						last.setTime(e.getStart());
 					}
 				} catch (ParseException exc) {
-					BugSenseHandler.log(TAG, exc);
+					BugSenseHandler.sendException(exc);
 				}
 			}
 
@@ -226,6 +227,7 @@ public class TimetableApplication extends Application {
 		return df.parse(a).before(df.parse(b));
 	}
 
+	@Override
 	public void onCreate() {
 		super.onCreate();
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -244,7 +246,8 @@ public class TimetableApplication extends Application {
 		}
 	}
 
-	public void onNewItem(Subjects s, Events e) throws SQLiteConstraintException{
+	public void onNewItem(Subjects s, Events e)
+			throws SQLiteConstraintException {
 		if (subjectsDao.queryBuilder().where(Properties.Title.eq(s.getTitle()))
 				.count() == 1) {
 			s.setId(subjectsDao.queryBuilder()
