@@ -73,7 +73,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 	private String matrikelNrNeu;
 	private String showPastString;
 	private String showPastStringNeu;
-	
+
 	private String tempFachrichtung;
 
 	private Preference pref_sync_force;
@@ -85,7 +85,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 		kursSemesterNeu = prefs.getString(
 				getString(R.string.prefs_semester_kurs_key), "n/a");
 		fachrichtungNeu = prefs.getString(
-				getString(R.string.prefs_fachrichtungKey), "n/a");		
+				getString(R.string.prefs_fachrichtungKey), "n/a");
 		matrikelNrNeu = prefs.getString(
 				getString(R.string.prefs_matrikelNrKey), "n/a");
 		showPastStringNeu = prefs.getString("showHistory", "n/a");
@@ -93,8 +93,14 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 		if (!kursSemesterNeu.equals(kursSemester)
 				|| !fachrichtungNeu.equals(fachrichtung)
 				|| !matrikelNrNeu.equals(matrikelNr)) {
-			isChanged = true;
+			if (!kursSemesterNeu.equals("n/a")
+					&& !fachrichtungNeu.equals("n/a")) {
+				isChanged = true;
+			}else{
+				isChanged = false;
+			}
 		}
+		
 		if (!showPastString.equals(showPastStringNeu)) {
 			refreshHistory = true;
 		}
@@ -139,8 +145,8 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 			sync.setEnabled(false);
 		}
 
-		kursSemester = prefs
-				.getString(getString(R.string.prefs_semester_kurs_key), "n/a");
+		kursSemester = prefs.getString(
+				getString(R.string.prefs_semester_kurs_key), "n/a");
 		fachrichtung = prefs.getString(
 				getString(R.string.prefs_fachrichtungKey), "n/a");
 		tempFachrichtung = String.valueOf(fachrichtung);
@@ -156,11 +162,11 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 		final ListPreference pref_fachrichtung = (ListPreference) findPreference(getString(R.string.prefs_fachrichtungKey));
 		final ListPreference pref_semesterKurs = (ListPreference) findPreference(getString(R.string.prefs_semester_kurs_key));
 
-		if (!matrikelNr.equals("n/a") || !matrikelNr.equals("")) {
+		if (!matrikelNr.equals("n/a") && !matrikelNr.equals("")) {
 			pref_fachrichtung.setEnabled(true);
 		}
 
-		if (!fachrichtung.equals("n/a") || !fachrichtung.equals("")) {
+		if (!fachrichtung.equals("n/a") && !fachrichtung.equals("")) {
 			pref_semesterKurs.setEnabled(true);
 			fillKursSemesterPreference(pref_semesterKurs);
 		}
@@ -194,7 +200,7 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 					@Override
 					public boolean onPreferenceChange(Preference preference,
 							Object newValue) {
-						
+
 						if (!newValue.equals("")) {
 							pref_semesterKurs.setEnabled(true);
 							pref_semesterKurs
@@ -210,24 +216,22 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 						} else {
 							pref_semesterKurs.setEnabled(false);
 						}
-						
+
 						if (!tempFachrichtung.equals(newValue)) {
 							Editor edit = prefs.edit();
 							edit.remove(getString(R.string.prefs_semester_kurs_key));
 							edit.apply();
-							
+
 							pref_semesterKurs.setValue("-1");
 						}
-						
+
 						tempFachrichtung = String.valueOf(newValue);
 
 						return true;
 					}
 
 				});
-		
-		
-		
+
 		Preference pref_showPast = findPreference(getString(R.string.prefs_showInPastKey));
 		if (pref_showPast != null) {
 			pref_showPast
@@ -454,15 +458,20 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 
 	private void fillKursSemesterPreference(
 			final ListPreference pref_semesterKurs) {
-		pref_semesterKurs
-				.setEntries(Timetables.timetable_matrix[Integer
-						.parseInt(fachrichtung)]);
 
-		String[] values = new String[pref_semesterKurs
-				.getEntries().length];
-		for (int i = 0; i < values.length; i++) {
-			values[i] = String.valueOf(i);
+		try {
+			int fach = Integer.parseInt(fachrichtung);
+			pref_semesterKurs.setEntries(Timetables.timetable_matrix[fach]);
+
+			String[] values = new String[pref_semesterKurs.getEntries().length];
+			for (int i = 0; i < values.length; i++) {
+				values[i] = String.valueOf(i);
+			}
+			pref_semesterKurs.setEntryValues(values);
+		} catch (NumberFormatException e) {
+			pref_semesterKurs.setEnabled(false);
+			return;
 		}
-		pref_semesterKurs.setEntryValues(values);
+
 	}
 }
