@@ -26,21 +26,12 @@ limitations under the License. -->
             android:entryValues="@array/prefs_entries_values_fachrichtung"
             android:key="@string/prefs_fachrichtungKey"
             android:summary="@string/text_prefs_fachrichtung_summary"
-            android:title="@string/text_prefs_fachrichtung_title" >
+            android:title="@string/text_prefs_fachrichtung_title" android:enabled="false">
         </ListPreference>
         <ListPreference
-            android:entries="@array/prefs_entries_semester"
-            android:entryValues="@array/prefs_entries_values_semester"
-            android:key="@string/prefs_semesterKey"
-            android:summary="@string/text_prefs_semster_summary"
-            android:title="@string/text_prefs_semester_title" >
-        </ListPreference>
-        <ListPreference
-            android:entries="@array/prefs_entries_kurs"
-            android:entryValues="@array/prefs_entries_values_kurs"
-            android:key="@string/prefs_kursKey"
+            android:key="@string/prefs_semester_kurs_key"
             android:summary="@string/text_prefs_kurs_summary"
-            android:title="@string/text_prefs_kurs_title" >
+            android:title="@string/text_prefs_kurs_title" android:enabled="false">
         </ListPreference>
 
         <PreferenceScreen

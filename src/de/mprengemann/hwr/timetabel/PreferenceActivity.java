@@ -21,7 +21,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.app.TimePickerDialog.OnTimeSetListener;
@@ -35,10 +34,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
 import android.text.InputType;
+import android.util.Log;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -52,6 +54,7 @@ import de.mprengemann.hwr.timetabel.data.CalendarUtils;
 import de.mprengemann.hwr.timetabel.data.CalendarUtils.CalendarExportListener;
 import de.mprengemann.hwr.timetabel.data.CalendarUtils.CalendarSyncListener;
 import de.mprengemann.hwr.timetabel.data.GoogleCalendar;
+import de.mprengemann.hwr.timetabel.data.Timetables;
 
 @EActivity
 public class PreferenceActivity extends SherlockPreferenceActivity {
@@ -62,16 +65,16 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 	private SharedPreferences prefs;
 	private boolean isChanged = false;
 	private boolean refreshHistory = false;
-	private String kurs;
-	private String kursNeu;
+	private String kursSemester;
+	private String kursSemesterNeu;
 	private String fachrichtung;
 	private String fachrichtungNeu;
-	private String semester;
-	private String semesterNeu;
 	private String matrikelNr;
 	private String matrikelNrNeu;
 	private String showPastString;
 	private String showPastStringNeu;
+	
+	private String tempFachrichtung;
 
 	private Preference pref_sync_force;
 
@@ -79,17 +82,16 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 
 	@Override
 	public void finish() {
-		kursNeu = prefs.getString(getString(R.string.prefs_kursKey), "n/a");
+		kursSemesterNeu = prefs.getString(
+				getString(R.string.prefs_semester_kurs_key), "n/a");
 		fachrichtungNeu = prefs.getString(
-				getString(R.string.prefs_fachrichtungKey), "n/a");
-		semesterNeu = prefs.getString(getString(R.string.prefs_semesterKey),
-				"n/a");
+				getString(R.string.prefs_fachrichtungKey), "n/a");		
 		matrikelNrNeu = prefs.getString(
 				getString(R.string.prefs_matrikelNrKey), "n/a");
 		showPastStringNeu = prefs.getString("showHistory", "n/a");
 
-		if (!kursNeu.equals(kurs) || !fachrichtungNeu.equals(fachrichtung)
-				|| !semesterNeu.equals(semester)
+		if (!kursSemesterNeu.equals(kursSemester)
+				|| !fachrichtungNeu.equals(fachrichtung)
 				|| !matrikelNrNeu.equals(matrikelNr)) {
 			isChanged = true;
 		}
@@ -137,20 +139,95 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 			sync.setEnabled(false);
 		}
 
-		kurs = prefs.getString(getString(R.string.prefs_kursKey), "n/a");
+		kursSemester = prefs
+				.getString(getString(R.string.prefs_semester_kurs_key), "n/a");
 		fachrichtung = prefs.getString(
 				getString(R.string.prefs_fachrichtungKey), "n/a");
-		semester = prefs
-				.getString(getString(R.string.prefs_semesterKey), "n/a");
+		tempFachrichtung = String.valueOf(fachrichtung);
 		matrikelNr = prefs.getString(getString(R.string.prefs_matrikelNrKey),
 				"n/a");
 		showPastString = prefs.getString(
 				getString(R.string.prefs_showInPastKey),
 				getString(R.string.prefs_default_showInPast));
 
-		EditTextPreference pref = (EditTextPreference) findPreference(getString(R.string.prefs_matrikelNrKey));
-		pref.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
+		EditTextPreference pref_matrikel = (EditTextPreference) findPreference(getString(R.string.prefs_matrikelNrKey));
+		pref_matrikel.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
 
+		final ListPreference pref_fachrichtung = (ListPreference) findPreference(getString(R.string.prefs_fachrichtungKey));
+		final ListPreference pref_semesterKurs = (ListPreference) findPreference(getString(R.string.prefs_semester_kurs_key));
+
+		if (!matrikelNr.equals("n/a") || !matrikelNr.equals("")) {
+			pref_fachrichtung.setEnabled(true);
+		}
+
+		if (!fachrichtung.equals("n/a") || !fachrichtung.equals("")) {
+			pref_semesterKurs.setEnabled(true);
+			fillKursSemesterPreference(pref_semesterKurs);
+		}
+
+		pref_matrikel
+				.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+					@Override
+					public boolean onPreferenceChange(Preference preference,
+							Object newValue) {
+						if (!newValue.equals("")) {
+							pref_fachrichtung.setEnabled(true);
+
+							if (!fachrichtung.equals("n/a")
+									|| !fachrichtung.equals("")) {
+								pref_semesterKurs.setEnabled(true);
+								fillKursSemesterPreference(pref_semesterKurs);
+							}
+						} else {
+							pref_fachrichtung.setEnabled(false);
+							pref_semesterKurs.setEnabled(false);
+						}
+
+						return true;
+					}
+				});
+
+		pref_fachrichtung
+				.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+					@Override
+					public boolean onPreferenceChange(Preference preference,
+							Object newValue) {
+						
+						if (!newValue.equals("")) {
+							pref_semesterKurs.setEnabled(true);
+							pref_semesterKurs
+									.setEntries(Timetables.timetable_matrix[Integer
+											.parseInt(String.valueOf(newValue))]);
+
+							String[] values = new String[pref_semesterKurs
+									.getEntries().length];
+							for (int i = 0; i < values.length; i++) {
+								values[i] = String.valueOf(i);
+							}
+							pref_semesterKurs.setEntryValues(values);
+						} else {
+							pref_semesterKurs.setEnabled(false);
+						}
+						
+						if (!tempFachrichtung.equals(newValue)) {
+							Editor edit = prefs.edit();
+							edit.remove(getString(R.string.prefs_semester_kurs_key));
+							edit.apply();
+							
+							pref_semesterKurs.setValue("-1");
+						}
+						
+						tempFachrichtung = String.valueOf(newValue);
+
+						return true;
+					}
+
+				});
+		
+		
+		
 		Preference pref_showPast = findPreference(getString(R.string.prefs_showInPastKey));
 		if (pref_showPast != null) {
 			pref_showPast
@@ -373,5 +450,19 @@ public class PreferenceActivity extends SherlockPreferenceActivity {
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void fillKursSemesterPreference(
+			final ListPreference pref_semesterKurs) {
+		pref_semesterKurs
+				.setEntries(Timetables.timetable_matrix[Integer
+						.parseInt(fachrichtung)]);
+
+		String[] values = new String[pref_semesterKurs
+				.getEntries().length];
+		for (int i = 0; i < values.length; i++) {
+			values[i] = String.valueOf(i);
+		}
+		pref_semesterKurs.setEntryValues(values);
 	}
 }

@@ -15,18 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 <resources>
-    <string-array name="prefs_entries_kurs">
-    	<item>Kurs</item>
-        <item>Kurs A</item>
-        <item>Kurs B</item>
-        <item>Kurs C</item>
-    </string-array>
-    <string-array name="prefs_entries_values_kurs">
-    	<item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
     <string-array name="prefs_entries_fachrichtung">
         <item>Bank</item>
         <item>Bauwesen</item>
@@ -66,23 +54,7 @@ limitations under the License. -->
         <item>15</item>
         <item>16</item>
         <item>17</item>
-    </string-array>
-    <string-array name="prefs_entries_semester">
-    	<item>Semester 1</item>
-    	<item>Semester 2</item>
-    	<item>Semester 3</item>
-    	<item>Semester 4</item>
-    	<item>Semester 5</item>
-    	<item>Semester 6</item>
     </string-array>    
-    <string-array name="prefs_entries_values_semester">
-    	<item>1</item>
-    	<item>2</item>
-    	<item>3</item>
-    	<item>4</item>
-    	<item>5</item>
-    	<item>6</item>
-    </string-array>
     <item type="bool" name="prefs_default_cal_sync" format="boolean">false</item>
     <item type="bool" name="prefs_default_isProxy" format="boolean">false</item>
     <string name="prefs_default_proxy">194.94.23.231</string>

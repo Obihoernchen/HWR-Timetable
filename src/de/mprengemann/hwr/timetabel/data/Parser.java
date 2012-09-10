@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
@@ -170,6 +169,9 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 					} catch (NullPointerException e) {
 						throw new ConnectionAuthentificationException(
 								context.getString(R.string.dialog_error_message_auth));
+					} catch (IndexOutOfBoundsException e) {
+						throw new ConnectionAuthentificationException(
+								context.getString(R.string.dialog_error_message_auth));
 					}
 
 					if (is != null) {
@@ -226,7 +228,9 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 											}
 										}
 										try {
-											listener.onNewItem(s, evt);
+											if (listener != null){
+												listener.onNewItem(s, evt);												
+											}
 										} catch (SQLiteConstraintException e) {
 											exception = new StorageException(
 													context.getString(R.string.dialog_error_message_storage));
@@ -241,7 +245,7 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 						} catch (ParserException e) {
 							exception = new UnknownTimetableException(
 									context.getString(R.string.dialog_error_message_timetable));
-							sendBugReport(e);
+							sendNewTimetable(url);
 						} catch (IOException e) {
 							if (e instanceof HttpHostConnectException) {
 								exception = new ConnectionTimeoutException(
@@ -249,7 +253,6 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 							} else {
 								exception = new ConnectionException(
 										context.getString(R.string.dialog_error_message));
-								sendBugReport(e);
 							}
 						}
 					} else {
@@ -264,6 +267,10 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 					} else if (e instanceof MalformedURLException) {
 						exception = new ConnectionException(
 								context.getString(R.string.dialog_error_message));
+						sendBugReport(e);
+					} else if (e instanceof HttpHostConnectException){
+						exception = new ConnectionTimeoutException(
+								context.getString(R.string.dialog_error_message_timeout));
 					} else {
 						exception = new ConnectionException(
 								context.getString(R.string.dialog_error_message));
@@ -283,7 +290,6 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 									context.getString(R.string.dialog_error_message));
 							sendBugReport(e);
 						}
-
 					}
 				}
 
@@ -308,12 +314,16 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 	}
 
 	protected void onPostExecute(Void result) {
-		listener.onLoadingFinished(exception);
+		if (listener != null){
+			listener.onLoadingFinished(exception);			
+		}
 	}
 
 	protected void onPreExecute() {
 		exception = null;
-		listener.onLoadingStarted("");
+		if (listener != null){
+			listener.onLoadingStarted("");			
+		}
 	}
 
 	private void sendBugReport(Exception e, HashMap<String, String> extraData) {
@@ -351,5 +361,18 @@ public class Parser extends AsyncTask<Void, Void, Void> {
 		extraData.put(META_URL, url);
 
 		sendBugReport(e, extraData);
+	}
+
+	private void sendNewTimetable(URL url) {
+		final String fachrichtung = preferences.getString(
+				context.getString(R.string.prefs_fachrichtungKey), "1");
+		final String semester = preferences.getString(
+				context.getString(R.string.prefs_semesterKey), "1");
+		final String kurs = preferences.getString(
+				context.getString(R.string.prefs_kursKey), "1");
+
+		BugSenseHandler.sendEvent(context,
+				"Request unknown timetable: fachrichtung " + fachrichtung
+						+ " semester " + semester + " kurs " + kurs + " url " + url.toString());
 	}
 }

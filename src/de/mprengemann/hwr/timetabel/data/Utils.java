@@ -35,7 +35,17 @@ public class Utils {
 	private static final int CASE_KURS_B = 2;
 	private static final int CASE_KURS_C = 3;
 
-	public static String buildURL(Context context, SharedPreferences preferences) {
+	public static String buildURL(Context context, SharedPreferences preferences){
+		int fachrichtung = Integer.parseInt(preferences.getString(
+				context.getString(R.string.prefs_fachrichtungKey), "0"));
+		int course = Integer.parseInt(preferences.getString(
+				context.getString(R.string.prefs_semester_kurs_key), "0"));
+		
+		return "http://ipool.ba-berlin.de/stundenplaene.anzeige.php?faculty="
+				+ fachrichtung + "&course=" + course + "&type=ics";
+	}
+	
+	public static int getCourseFromOldPrefs(Context context, SharedPreferences preferences) {
 		int fachrichtung = Integer.parseInt(preferences.getString(
 				context.getString(R.string.prefs_fachrichtungKey), "1"));
 		int semester = Integer.parseInt(preferences.getString(
@@ -87,8 +97,7 @@ public class Utils {
 			break;
 		}
 
-		return "http://ipool.ba-berlin.de/stundenplaene.anzeige.php?faculty="
-				+ fachrichtung + "&course=" + course + "&type=ics";
+		return course;
 	}
 
 	public static boolean connectionChecker(Context context) {

@@ -504,6 +504,21 @@ public class TimetableActivity extends SherlockFragmentActivity {
 		final SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 
+		String kurs = prefs.getString(getString(R.string.prefs_kursKey), "n/a");
+		String semester = prefs.getString(
+				getString(R.string.prefs_semesterKey), "n/a");
+
+		if (!kurs.equals("n/a") && !semester.equals("n/a")) {
+			Editor editor = prefs.edit();
+			editor.putString(getString(R.string.prefs_semester_kurs_key),
+					String.valueOf(Utils.getCourseFromOldPrefs(this, prefs)));
+
+			editor.remove(getString(R.string.prefs_kursKey));
+			editor.remove(getString(R.string.prefs_semesterKey));
+
+			editor.apply();
+		}
+
 		parsingListener = new OnLoadingListener() {
 
 			ProgressDialog dialog;
