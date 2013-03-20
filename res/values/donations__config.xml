@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Flattr -->
+    <item name="donations__flattr_enabled" type="bool">true</item>
+    <item name="donations__flattr_project_url" format="string" type="string">
+        https://github.com/winterDroid/HWR-Timetable
+    </item>
+    <!-- without http:// ! -->
+    <item name="donations__flattr_url" format="string" type="string">flattr.com/t/1181095</item>
+
+    <!-- Google Play Store In-App Billing -->
+    <item name="donations__google_enabled" type="bool">true</item>
+
+    <!-- your public key from the google play publisher account -->
+    <item name="donations__google_pubkey" format="string" type="string">
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApU/5OFlqswlODhtomK1H17zneKTRKXIcVAllyUqS5mBxZw6C9sTvi3XCRZBdiaoTaldZZezwUvNgOkqH8pRJFe15LxHXj4mCVqAhVsNmLDevuFS7HCG+87G26xML9o+/RtOi+uTO8nqIwXN4rjUSadXb5UkRtR1tyhLFBeS7bfi24t+iuXm1Y0hT0JhB6u2qe/yITyk8Q7OxGlIuJm42PVEM6IZuGBUyjCy9IEcm0xY4URwKXmIL5Kl2gIPbOO/uz4Y7NdEy6ONhx1FdNxs34eaqLLnitK9Z4AFF2y8L+k7pvQZnRkcJDZE+w1bYIravPskIinTnCWZfCNtZJjFFLwIDAQAB
+    </item>
+
+    <!--
+    mapping from the possible donations of 1,2,3,5,8 and 13 eur to your in-app items defined in
+    the publisher account of google play
+    -->
+    <string-array name="donations__google_catalog" translatable="false">
+        <item>hwrtimetable.donation.1</item>
+        <item>hwrtimetable.donation.2</item>
+        <item>hwrtimetable.donation.3</item>
+        <item>hwrtimetable.donation.5</item>
+        <item>hwrtimetable.donation.8</item>
+        <item>hwrtimetable.donation.13</item>
+    </string-array>
+
+    <!-- PayPal -->
+    <item name="donations__paypal_enabled" type="bool">true</item>
+    <item name="donations__paypal_user" format="string" type="string">marcprengemann@web.de</item>
+    <item name="donations__paypal_currency_code" format="string" type="string">EUR</item>
+
+    <!-- This value can also be translated! -->
+    <!-- Add translatable="false" if you don't want or need to translate -->
+    <string name="donations__paypal_item_name">HWR Stundenplan-App Spende</string>
+
+</resources>

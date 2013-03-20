@@ -22,5 +22,7 @@ limitations under the License. -->
     <item type="id" name="menu_feedback"/>
     <item type="id" name="menu_license"/>
     <item name="menu_donate" type="id"/>
-    
+    <item name="action_mode_delete" type="id"/>
+    <item name="action_mode_edit" type="id"/>
+
 </resources>

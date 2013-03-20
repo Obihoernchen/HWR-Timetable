@@ -15,341 +15,420 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel.viewadapters;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.bugsense.trace.BugSenseHandler;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
+import com.bugsense.trace.BugSenseHandler;
 import de.mprengemann.hwr.timetabel.Events;
 import de.mprengemann.hwr.timetabel.R;
 import de.mprengemann.hwr.timetabel.TimetableApplication;
 
-public class SubjectsAdapter extends BaseAdapter {
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
-	public interface OnDataChangeListener {
-		void onDataChange(int size, String text);
-	}
+public class SubjectsAdapter extends BaseAdapter implements SectionIndexer {
 
-	public interface OnSelectionChangeListener {
-		void onSelected(long new_id);
-	}
+  public final static long SECOND_MILLIS = 1000;
+  public final static long MINUTE_MILLIS = SECOND_MILLIS * 60;
+  public final static long HOUR_MILLIS = MINUTE_MILLIS * 60;
+  public final static long DAY_MILLIS = HOUR_MILLIS * 24;
+  public final static long YEAR_MILLIS = DAY_MILLIS * 365;
+  private static final String TAG = SubjectsAdapter.class.getSimpleName();
+  private static final int TYPE_ITEM = 0;
+  private static final int TYPE_SEPARATOR = 1;
+  private static final int TYPE_MAX_COUNT = TYPE_SEPARATOR + 1;
+  private OnDataChangeListener listener;
+  private LayoutInflater mInflater;
+  private SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.GERMANY);
+  private SimpleDateFormat fullDateFormat = new SimpleDateFormat(
+      "EE, dd.MM.yyyy", Locale.GERMANY);
+  private SimpleDateFormat reallyShortFormat = new SimpleDateFormat("d.M.", Locale.GERMANY);
+  private HashMap<Integer, Events> mData = new HashMap<Integer, Events>();
+  private TreeMap<Integer, String> mSeparatorsSet = new TreeMap<Integer, String>(new SeparatorComparator());
+  private Context context;
+  private TimetableApplication app;
+  private boolean isLoading = false;
+  private long selection = -1;
+  private OnSelectionChangeListener selListener;
 
-	class ViewHolder {
-		TextView titleView;
-		TextView dateView;
-		TextView roomView;
-		TextView seperatorView;
-	}
+  public SubjectsAdapter(Context context, TimetableApplication app) {
+    mInflater = LayoutInflater.from(context);
+    this.context = context;
+    this.app = app;
+  }
 
-	private OnDataChangeListener listener;
-	public final static long SECOND_MILLIS = 1000;
-	public final static long MINUTE_MILLIS = SECOND_MILLIS * 60;
-	public final static long HOUR_MILLIS = MINUTE_MILLIS * 60;
+  public void addItem(final Events evt) {
+    mData.put(Integer.valueOf(mData.size() + mSeparatorsSet.size()), evt);
+    callListener();
+    notifyDataSetChanged();
+  }
 
-	public final static long DAY_MILLIS = HOUR_MILLIS * 24;
-	public final static long YEAR_MILLIS = DAY_MILLIS * 365;
-	private static final int TYPE_ITEM = 0;
-	private static final int TYPE_SEPARATOR = 1;
+  public void addSeparatorItem(final String str) {
+    mSeparatorsSet.put(
+        Integer.valueOf(mData.size() + mSeparatorsSet.size()), str);
+    callListener();
+    notifyDataSetChanged();
+  }
 
-	private static final int TYPE_MAX_COUNT = TYPE_SEPARATOR + 1;
+  private void callListener() {
+    if (listener != null) {
+      listener.onDataChange(getCount(), getLoadingString());
+    }
+  }
 
-	private static final String TAG = "SubjectsAdapter";
-	private LayoutInflater mInflater;
+  public void clear() {
+    mData = new HashMap<Integer, Events>();
+    mSeparatorsSet = new TreeMap<Integer, String>(new SeparatorComparator());
 
-	private SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.GERMANY);
-	private SimpleDateFormat fullDateFormat = new SimpleDateFormat(
-			"EE, dd.MM.yyyy", Locale.GERMANY);
-	private HashMap<Integer, Events> mData = new HashMap<Integer, Events>();
-	private HashMap<Integer, String> mSeparatorsSet = new HashMap<Integer, String>();
+    callListener();
+    notifyDataSetChanged();
+  }
 
-	private Context context;
+  private long daysDiff(final Calendar today, final Calendar nextSeperatorDate) {
+    Calendar date = (Calendar) today.clone();
+    date.set(Calendar.HOUR_OF_DAY, 0);
+    date.set(Calendar.MINUTE, 0);
+    date.set(Calendar.SECOND, 0);
+    date.set(Calendar.MILLISECOND, 0);
 
-	private TimetableApplication app;
+    Calendar next = (Calendar) nextSeperatorDate.clone();
+    next.set(Calendar.HOUR_OF_DAY, 0);
+    next.set(Calendar.MINUTE, 0);
+    next.set(Calendar.SECOND, 0);
+    next.set(Calendar.MILLISECOND, 0);
 
-	private boolean isLoading = false;
+    long daysBetween = 0;
+    int multi = 1;
 
-	private long selection = 0;
+    if (!date.before(next)) {
+      if (date.compareTo(next) != 0) {
+        multi = -1;
+        Calendar temp = (Calendar) date.clone();
+        date = (Calendar) next.clone();
+        next = (Calendar) temp.clone();
+      }
+    }
 
-	private OnSelectionChangeListener selListener;
+    while (date.before(next)) {
+      date.add(Calendar.DAY_OF_MONTH, 1);
+      daysBetween++;
+    }
 
-	public SubjectsAdapter(Context context, TimetableApplication app) {
-		mInflater = LayoutInflater.from(context);
-		this.context = context;
-		this.app = app;
-	}
+    return multi * daysBetween;
+  }
 
-	public void addItem(final Events evt) {
-		mData.put(Integer.valueOf(mData.size() + mSeparatorsSet.size()), evt);
-		callListener();
-		notifyDataSetChanged();
-	}
+  @Override
+  public int getCount() {
+    return (mData.size() + mSeparatorsSet.size());
+  }
 
-	public void addSeparatorItem(final String str) {
-		mSeparatorsSet.put(
-				Integer.valueOf(mData.size() + mSeparatorsSet.size()), str);
-		callListener();
-		notifyDataSetChanged();
-	}
+  @Override
+  public Events getItem(int position) {
+    return mData.get(Integer.valueOf(position));
+  }
 
-	private void callListener() {
-		if (listener != null) {
-			listener.onDataChange(getCount(), getLoadingString());
-		}
-	}
+  @Override
+  public long getItemId(int position) {
+    return position;
+  }
 
-	public void clear() {
-		mData = new HashMap<Integer, Events>();
-		mSeparatorsSet = new HashMap<Integer, String>();
+  @Override
+  public int getItemViewType(int position) {
+    return mSeparatorsSet.containsKey(Integer.valueOf(position)) ? TYPE_SEPARATOR
+        : TYPE_ITEM;
+  }
 
-		callListener();
-		notifyDataSetChanged();
-	}
+  private String getLoadingString() {
+    if (isLoading) {
+      return context.getString(R.string.text_please_wait);
+    } else if (app.getSubjectCount() == 0) {
+      return context.getString(R.string.text_no_subjects);
+    } else {
+      return context.getString(R.string.text_no_subjects_in_time);
+    }
+  }
 
-	private long daysDiff(final Calendar today, final Calendar nextSeperatorDate) {
-		Calendar date = (Calendar) today.clone();
-		date.set(Calendar.HOUR_OF_DAY, 0);
-		date.set(Calendar.MINUTE, 0);
-		date.set(Calendar.SECOND, 0);
-		date.set(Calendar.MILLISECOND, 0);
+  public int getSeparatorPosition(String item) {
+    for (Entry<Integer, String> set : mSeparatorsSet.entrySet()) {
+      if (set.getValue().contains(item)) {
+        return set.getKey();
+      }
+    }
+    return 0;
+  }
 
-		Calendar next = (Calendar) nextSeperatorDate.clone();
-		next.set(Calendar.HOUR_OF_DAY, 0);
-		next.set(Calendar.MINUTE, 0);
-		next.set(Calendar.SECOND, 0);
-		next.set(Calendar.MILLISECOND, 0);
+  public String getSeperatorItem(int position) {
+    return mSeparatorsSet.get(Integer.valueOf(position));
+  }
 
-		long daysBetween = 0;
-		int multi = 1;
+  @Override
+  public View getView(int position, View convertView, ViewGroup parent) {
+    ViewHolder holder;
+    int type = getItemViewType(position);
+    if (convertView == null) {
+      holder = new ViewHolder();
+      switch (type) {
+        case TYPE_ITEM:
+          convertView = mInflater.inflate(R.layout.fragment_subject_item,
+              null);
+          holder.titleView = (TextView) convertView
+              .findViewById(R.id.text_subject_item_title);
+          holder.dateView = (TextView) convertView
+              .findViewById(R.id.text_subject_item_time);
+          holder.roomView = (TextView) convertView
+              .findViewById(R.id.text_subject_item_room);
 
-		if (!date.before(next)) {
-			if (date.compareTo(next) != 0) {
-				multi = -1;
-				Calendar temp = (Calendar) date.clone();
-				date = (Calendar) next.clone();
-				next = (Calendar) temp.clone();
-			}
-		}
+          if (position % 2 == 0) {
+            convertView.setBackgroundColor(context.getResources()
+                .getColor(R.color.abs__background_holo_dark));
+          } else {
+            convertView.setBackgroundColor(context.getResources()
+                .getColor(R.color.abs__background_holo_light));
+          }
 
-		while (date.before(next)) {
-			date.add(Calendar.DAY_OF_MONTH, 1);
-			daysBetween++;
-		}
+          break;
+        case TYPE_SEPARATOR:
+          convertView = mInflater.inflate(
+              R.layout.fragment_subject_separator, null);
+          holder.separatorView = (TextView) convertView
+              .findViewById(R.id.text_subject_separator);
+          break;
+      }
+      convertView.setTag(holder);
+    } else {
+      holder = (ViewHolder) convertView.getTag();
+    }
 
-		return multi * daysBetween;
-	}
+    if (type == TYPE_ITEM) {
+      final Events item = mData.get(position);
 
-	@Override
-	public int getCount() {
-		return (mData.size() + mSeparatorsSet.size());
-	}
+      if (item != null) {
+        if (selection == item.getId()) {
+          convertView
+              .setBackgroundResource(R.drawable.abs__list_activated_holo);
+          int padding = context.getResources().getDimensionPixelSize(
+              R.dimen.default_list_padding);
+          convertView.setPadding(padding, padding, padding, padding);
+        } else {
+          convertView
+              .setBackgroundResource(android.R.color.transparent);
+        }
 
-	@Override
-	public Events getItem(int position) {
-		return mData.get(Integer.valueOf(position));
-	}
+        try {
+          holder.titleView.setText(item.getSubjects().getTitle());
+        } catch (Exception e) {
+          Log.e(TAG, item.getSubjectId() + " " + item.getSubjects());
+          HashMap<String, String> extraData = new HashMap<String, String>();
+          extraData.put("subjectsid",
+              String.valueOf(item.getSubjectId()));
+          extraData.put("subjects",
+              String.valueOf(item.getSubjects()));
 
-	@Override
-	public long getItemId(int position) {
-		return position;
-	}
+          BugSenseHandler.sendExceptionMap(extraData, e);
+        }
 
-	@Override
-	public int getItemViewType(int position) {
-		return mSeparatorsSet.containsKey(Integer.valueOf(position)) ? TYPE_SEPARATOR
-				: TYPE_ITEM;
-	}
+        holder.roomView.setText(item.getRoom());
+        holder.dateView.setText(df.format(item.getStart()) + " - "
+            + df.format(item.getEnd()));
+      }
 
-	private String getLoadingString() {
-		if (isLoading) {
-			return context.getString(R.string.text_please_wait);
-		} else if (app.getSubjectCount() == 0) {
-			return context.getString(R.string.text_no_subjects);
-		} else {
-			return context.getString(R.string.text_no_subjects_in_time);
-		}
-	}
+    } else {
+      try {
+        Calendar nextSeperatorDate = Calendar.getInstance();
+        nextSeperatorDate.setTime(fullDateFormat
+            .parse(getSeperatorItem(position)));
 
-	public int getSeparatorPosition(String item) {
-		if (mSeparatorsSet.containsValue(item)) {
-			for (Entry<Integer, String> set : mSeparatorsSet.entrySet()) {
-				if (set.getValue().equals(item)) {
-					return set.getKey();
-				}
-			}
-		}
+        long dateDiff = daysDiff(Calendar.getInstance(),
+            nextSeperatorDate);
 
-		return 1;
-	}
+        if (dateDiff == 0) {
+          holder.separatorView.setText(context
+              .getString(R.string.text_today));
+        } else if (dateDiff == 1) {
+          holder.separatorView.setText(context
+              .getString(R.string.text_tomorrow));
+        } else if (dateDiff == -1) {
+          holder.separatorView.setText(context
+              .getString(R.string.text_yesterday));
+        } else if (dateDiff == -2) {
+          holder.separatorView.setText(context
+              .getString(R.string.text_twoago));
+        } else {
+          holder.separatorView.setText(getSeperatorItem(position));
+        }
+      } catch (Exception e) {
+        holder.separatorView.setText(getSeperatorItem(position));
+        BugSenseHandler.sendException(e);
+      }
 
-	public String getSeperatorItem(int position) {
-		return mSeparatorsSet.get(Integer.valueOf(position));
-	}
+    }
+    return convertView;
+  }
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		ViewHolder holder;
-		int type = getItemViewType(position);
-		if (convertView == null) {
-			holder = new ViewHolder();
-			switch (type) {
-			case TYPE_ITEM:
-				convertView = mInflater.inflate(R.layout.fragment_subject_item,
-						null);
-				holder.titleView = (TextView) convertView
-						.findViewById(R.id.text_subject_item_title);
-				holder.dateView = (TextView) convertView
-						.findViewById(R.id.text_subject_item_time);
-				holder.roomView = (TextView) convertView
-						.findViewById(R.id.text_subject_item_room);
+  @Override
+  public int getViewTypeCount() {
+    return TYPE_MAX_COUNT;
+  }
 
-				if (position % 2 == 0) {
-					convertView.setBackgroundColor(context.getResources()
-							.getColor(R.color.abs__background_holo_dark));
-				} else {
-					convertView.setBackgroundColor(context.getResources()
-							.getColor(R.color.abs__background_holo_light));
-				}
+  public void setItems(List<Events> events) {
+    clear();
+    setItemsInternal(events);
+  }
 
-				break;
-			case TYPE_SEPARATOR:
-				convertView = mInflater.inflate(
-						R.layout.fragment_subject_separator, null);
-				holder.seperatorView = (TextView) convertView
-						.findViewById(R.id.text_subject_separator);
-				break;
-			}
-			convertView.setTag(holder);
-		} else {
-			holder = (ViewHolder) convertView.getTag();
-		}
+  public void setLoading(boolean b) {
+    isLoading = b;
+  }
 
-		if (type == TYPE_ITEM) {
-			final Events item = mData.get(position);
+  public void setOnDataChangeListener(OnDataChangeListener listener) {
+    this.listener = listener;
+  }
 
-			if (item != null) {
-				if (selection == item.getId()) {
-					convertView
-							.setBackgroundResource(R.drawable.abs__list_activated_holo);
-					int padding = context.getResources().getDimensionPixelSize(
-							R.dimen.default_list_padding);
-					convertView.setPadding(padding, padding, padding, padding);
-				} else {
-					convertView
-							.setBackgroundResource(android.R.color.transparent);
-				}
+  public void setOnSelectionChangeListener(
+      OnSelectionChangeListener onSelectionChangeListener) {
+    this.selListener = onSelectionChangeListener;
+  }
 
-				try {
-					holder.titleView.setText(item.getSubjects().getTitle());
-				} catch (Exception e) {
-					Log.e(TAG, item.getSubjectId() + " " + item.getSubjects());
-					HashMap<String, String> extraData = new HashMap<String, String>();
-					extraData.put("subjectsid",
-							String.valueOf(item.getSubjectId()));
-					extraData.put("subjects",
-							String.valueOf(item.getSubjects()));
+  public void setSelection(Events mEvent) {
+    if (mEvent != null) {
+      this.selection = mEvent.getId();
+      if (selListener != null) {
+        selListener.onSelected(selection);
+      }
+    } else {
+      this.selection = -1;
+    }
+    notifyDataSetChanged();
+  }
 
-					BugSenseHandler.sendExceptionMap(extraData, e);
-				}
+  public void setItems(List<Events> events, String headline) {
+    clear();
 
-				holder.roomView.setText(item.getRoom());
-				holder.dateView.setText(df.format(item.getStart()) + " - "
-						+ df.format(item.getEnd()));
-			}
+    addSeparatorItem(headline);
+    setItemsInternal(events);
+  }
 
-		} else {
-			try {
-				Calendar nextSeperatorDate = Calendar.getInstance();
-				nextSeperatorDate.setTime(fullDateFormat
-						.parse(getSeperatorItem(position)));
+  private void setItemsInternal(List<Events> events) {
+    String fillDate = fullDateFormat.format(Calendar.getInstance()
+        .getTime());
+    String actualDate;
 
-				long dateDiff = daysDiff(Calendar.getInstance(),
-						nextSeperatorDate);
+    for (Events evt : events) {
+      actualDate = fullDateFormat.format(evt.getEnd());
 
-				if (dateDiff == 0) {
-					holder.seperatorView.setText(context
-							.getString(R.string.text_today));
-				} else if (dateDiff == 1) {
-					holder.seperatorView.setText(context
-							.getString(R.string.text_tomorrow));
-				} else if (dateDiff == -1) {
-					holder.seperatorView.setText(context
-							.getString(R.string.text_yesterday));
-				} else if (dateDiff == -2) {
-					holder.seperatorView.setText(context
-							.getString(R.string.text_twoago));
-				} else {
-					holder.seperatorView.setText(getSeperatorItem(position));
-				}
-			} catch (Exception e) {
-				holder.seperatorView.setText(getSeperatorItem(position));
-				BugSenseHandler.sendException(e);
-			}
+      if (actualDate.equals(fillDate) && mSeparatorsSet.size() > 0) {
+        addItem(evt);
+      } else {
+        addSeparatorItem(actualDate);
+        addItem(evt);
+      }
 
-		}
-		return convertView;
-	}
+      fillDate = actualDate;
+    }
 
-	@Override
-	public int getViewTypeCount() {
-		return TYPE_MAX_COUNT;
-	}
+    callListener();
+  }
 
-	public void setItems(List<Events> events) {
-		clear();
+  @Override
+  public Object[] getSections() {
+    Object[] sections = new Object[mSeparatorsSet.size()];
+    List<String> entries = new ArrayList<String>(mSeparatorsSet.values());
+    for (int i = 0; i < entries.size(); i++) {
+      try {
+        sections[i] = reallyShortFormat.format(fullDateFormat.parse(entries.get(i)));
+        if (sections[i].toString().length() > 4) {
+          sections[i] = new SimpleDateFormat("d.").format(fullDateFormat.parseObject(entries.get(i)));
+        }
+      } catch (Exception e) {
+        sections[i] = entries.get(i);
+      }
+    }
+    return sections;
+  }
 
-		String fillDate = fullDateFormat.format(Calendar.getInstance()
-				.getTime());
-		String actualDate = "";
+  @Override
+  public int getPositionForSection(int section) {
+    int i = 0;
+    for (Entry<Integer, String> entry : mSeparatorsSet.entrySet()) {
+      if (section == i) {
+        return entry.getKey();
+      }
+      i++;
+    }
+    return 0;
+  }
 
-		for (Events evt : events) {
-			actualDate = fullDateFormat.format(evt.getEnd());
+  @Override
+  public int getSectionForPosition(int position) {
+    int i = 0;
+    switch (getItemViewType(position)) {
+      case TYPE_ITEM:
+        Events e = getItem(position);
+        for (Entry<Integer, String> entry : mSeparatorsSet.entrySet()) {
+          if (entry.getValue().equals(fullDateFormat.format(e.getEnd()))) {
+            return i;
+          }
+          i++;
+        }
+        break;
+      case TYPE_SEPARATOR:
+        for (Entry<Integer, String> entry : mSeparatorsSet.entrySet()) {
+          if (entry.getKey().equals(Integer.valueOf(position))) {
+            return i;
+          }
+          i++;
+        }
+        break;
+      default:
+        return 0;
+    }
+    return 0;
+  }
 
-			if (actualDate.equals(fillDate) && mSeparatorsSet.size() > 0) {
-				addItem(evt);
-			} else {
-				addSeparatorItem(actualDate);
-				addItem(evt);
-			}
+  public void removeEvent(Long id) {
+    Integer key = null;
+    if (mData != null) {
+      for (Entry<Integer, Events> entry : mData.entrySet()) {
+        if (entry.getValue().getId().longValue() == id.longValue()) {
+          key = entry.getKey();
+          break;
+        }
+      }
+    }
+    if (key != null) {
+      mData.remove(key);
 
-			fillDate = actualDate;
-		}
+      List<Events> events = new ArrayList<Events>(mData.values());
+      setItems(events);
 
-		callListener();
-	}
+      notifyDataSetChanged();
+    }
+  }
 
-	public void setLoading(boolean b) {
-		isLoading = b;
-	}
+  public interface OnDataChangeListener {
+    void onDataChange(int size, String text);
+  }
 
-	public void setOnDataChangeListener(OnDataChangeListener listener) {
-		this.listener = listener;
-	}
+  public interface OnSelectionChangeListener {
+    void onSelected(long new_id);
+  }
 
-	public void setOnSelectionChangeListener(
-			OnSelectionChangeListener onSelectionChangeListener) {
-		this.selListener = onSelectionChangeListener;
-	}
+  class ViewHolder {
+    TextView titleView;
+    TextView dateView;
+    TextView roomView;
+    TextView separatorView;
+  }
 
-	public void setSelection(Events mEvent) {
-		if (mEvent != null) {
-			this.selection = mEvent.getId();
-			if (selListener != null) {
-				selListener.onSelected(selection);
-			}
-			notifyDataSetChanged();
-		}
-	}
-
+  private class SeparatorComparator implements Comparator<Integer> {
+    @Override
+    public int compare(Integer lhs, Integer rhs) {
+      return lhs.compareTo(rhs);
+    }
+  }
 }

@@ -15,34 +15,34 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel.icsparser;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+
 public class IcsParser {
 
-	public interface OnCalendarParsingListener {
-		void onNewItem(Component c);
-	}
+  public interface OnCalendarParsingListener {
+    void onNewItem(Component c);
+  }
 
-	@SuppressWarnings("unused")
-	private static final String TAG = "IcsParser";
+  @SuppressWarnings("unused")
+  private static final String TAG = "IcsParser";
 
-	public IcsParser(InputStream is, OnCalendarParsingListener listener)
-			throws IOException, ParserException {
+  public IcsParser(InputStream is, OnCalendarParsingListener listener)
+      throws IOException, ParserException {
 
-		CalendarBuilder builder = new CalendarBuilder();
-		Calendar calendar = builder.build(is);
+    CalendarBuilder builder = new CalendarBuilder();
+    Calendar calendar = builder.build(is);
 
-		for (@SuppressWarnings("rawtypes")
-		Iterator i = calendar.getComponents().iterator(); i.hasNext();) {
-			listener.onNewItem((Component) i.next());
-		}
-	}
+    for (@SuppressWarnings("rawtypes")
+         Iterator i = calendar.getComponents().iterator(); i.hasNext(); ) {
+      listener.onNewItem((Component) i.next());
+    }
+  }
 
 }

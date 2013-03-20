@@ -16,108 +16,207 @@
 package de.mprengemann.hwr.timetabel.data;
 
 public class Timetables {
-	
-	public static final String[] bank = new String[] { "Semester 1 - Kurs A",
-			"Semester 1 - Kurs B", "Semester 1 - Kurs C",
-			"Semester 2 - Kurs A", "Semester 2 - Kurs B",
-			"Semester 2 - Kurs C", "Semester 3 - Kurs A",
-			"Semester 3 - Kurs B", "Semester 3 - Kurs C",
-			"Semester 4 - Kurs A", "Semester 4 - Kurs B",
-			"Semester 4 - Kurs C", "Semester 5 - Kurs A",
-			"Semester 5 - Kurs B", "Semester 5 - Kurs C",
-			"Semester 6 - Kurs A", "Semester 6 - Kurs B", "Semester 6 - Kurs C" };
-	public static final String[] bauwesen = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] dlm = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] etechnik = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] facilitymngt = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] handel = new String[] { "Semester 1 - Kurs A",
-			"Semester 1 - Kurs B", "Semester 1 - Kurs C",
-			"Semester 2 - Kurs A", "Semester 2 - Kurs B",
-			"Semester 2 - Kurs C", "Semester 3 - Kurs A",
-			"Semester 3 - Kurs B", "Semester 3 - Kurs C",
-			"Semester 4 - Kurs A", "Semester 4 - Kurs B",
-			"Semester 4 - Kurs C", "Semester 5 - Kurs A",
-			"Semester 5 - Kurs B", "Semester 5 - Kurs C",
-			"Semester 6 - Kurs A", "Semester 6 - Kurs B", "Semester 6 - Kurs C" };
-	public static final String[] iba = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] immobilien = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] industrie = new String[] {
-			"Semester 1 - Kurs A", "Semester 1 - Kurs B",
-			"Semester 1 - Kurs C", "Semester 2 - Kurs A",
-			"Semester 2 - Kurs B", "Semester 2 - Kurs C",
-			"Semester 3 - Kurs A", "Semester 3 - Kurs B",
-			"Semester 3 - Kurs C", "Semester 4 - Kurs A",
-			"Semester 4 - Kurs B", "Semester 4 - Kurs C",
-			"Semester 5 - Kurs A", "Semester 5 - Kurs B",
-			"Semester 5 - Kurs C", "Semester 6 - Kurs A",
-			"Semester 6 - Kurs B", "Semester 6 - Kurs C" };
-	public static final String[] info = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] maschinenbau = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] logistik = new String[] {
-			"Semester 1 - Kurs A", "Semester 1 - Kurs B",
-			"Semester 2 - Kurs A", "Semester 2 - Kurs B",
-			"Semester 3 - Kurs A", "Semester 3 - Kurs B",
-			"Semester 4 - Kurs A", "Semester 4 - Kurs B",
-			"Semester 5 - Kurs A", "Semester 5 - Kurs B",
-			"Semester 6 - Kurs A", "Semester 6 - Kurs B" };
-	public static final String[] steuern = new String[] { "Semester 1",
-			"Semester 2", "Semester 3", "Semester 4", "Semester 5",
-			"Semester 6" };
-	public static final String[] tourismus = new String[] { "Semester 1",
-			"Semester 1 - Kurs A", "Semester 1 - Kurs B", "Semester 2",
-			"Semester 3", "Semester 4", "Semester 5", "Semester 6" };
-	public static final String[] versicherung = new String[] {
-			"Semester 1 - Kurs A", "Semester 1 - Kurs B",
-			"Semester 2 - Kurs A", "Semester 2 - Kurs B", "Semester 3",
-			"Semester 3 - Kurs A", "Semester 3 - Kurs B", "Semester 4",
-			"Semester 5", "Semester 6" };
-	public static final String[] wi = new String[] { "Semester 1 - Kurs A",
-			"Semester 1 - Kurs B", "Semester 1 - Kurs C",
-			"Semester 2 - Kurs A", "Semester 2 - Kurs B",
-			"Semester 2 - Kurs C", "Semester 3 - Kurs A",
-			"Semester 3 - Kurs B", "Semester 3 - Kurs C",
-			"Semester 4 - Kurs A", "Semester 4 - Kurs B",
-			"Semester 4 - Kurs C", "Semester 5 - Kurs A",
-			"Semester 5 - Kurs B", "Semester 5 - Kurs C",
-			"Semester 6 - Kurs A", "Semester 6 - Kurs B", "Semester 6 - Kurs C" };
-	public static final String[] externe = new String[] { "Haupt", "Jurscha",
-			"Praetel", "Wagner_Ralf", "Wittmuess" };
-	public static final String[] labor = new String[] { "6B_151_153" };
 
-	public static final String[][] timetable_matrix = new String[][]{
-		bank,
-		bauwesen,
-		dlm,
-		etechnik,
-		facilitymngt,
-		handel,
-		iba,
-		immobilien,
-		industrie,
-		info,
-		maschinenbau,
-		logistik,
-		steuern,
-		tourismus,
-		versicherung,
-		wi,
-		externe,
-		labor
-	};
+  public static final String[] BANK = new String[]{
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 1 - Kurs C",
+      "Semester 2 - Kurs A",
+      "Semester 2 - Kurs B",
+      "Semester 2 - Kurs C",
+      "Semester 3 - Kurs A",
+      "Semester 3 - Kurs B",
+      "Semester 3 - Kurs C",
+      "Semester 4 - Kurs A",
+      "Semester 4 - Kurs B",
+      "Semester 4 - Kurs C",
+      "Semester 5 - Kurs A",
+      "Semester 5 - Kurs B",
+      "Semester 5 - Kurs C",
+      "Semester 6 - Kurs A",
+      "Semester 6 - Kurs B",
+      "Semester 6 - Kurs C"};
+  public static final String[] BAUWESEN = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] DLM = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] ETECHNIK = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] FACILITYMNGT = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] HANDEL = new String[]{
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 1 - Kurs C",
+      "Semester 2 - Kurs A",
+      "Semester 2 - Kurs B",
+      "Semester 2 - Kurs C",
+      "Semester 3 - Kurs A",
+      "Semester 3 - Kurs B",
+      "Semester 3 - Kurs C",
+      "Semester 4 - Kurs A",
+      "Semester 4 - Kurs B",
+      "Semester 4 - Kurs C",
+      "Semester 5 - Kurs A",
+      "Semester 5 - Kurs B",
+      "Semester 5 - Kurs C",
+      "Semester 6 - Kurs A",
+      "Semester 6 - Kurs B",
+      "Semester 6 - Kurs C"};
+  public static final String[] IBA = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] IMMOBILIEN = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] INDUSTRIE = new String[]{
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 1 - Kurs C",
+      "Semester 2 - Kurs A",
+      "Semester 2 - Kurs B",
+      "Semester 2 - Kurs C",
+      "Semester 3 - Kurs A",
+      "Semester 3 - Kurs B",
+      "Semester 3 - Kurs C",
+      "Semester 4 - Kurs A",
+      "Semester 4 - Kurs B",
+      "Semester 4 - Kurs C",
+      "Semester 5 - Kurs A",
+      "Semester 5 - Kurs B",
+      "Semester 5 - Kurs C",
+      "Semester 6 - Kurs A",
+      "Semester 6 - Kurs B",
+      "Semester 6 - Kurs C"};
+  public static final String[] INFO = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] MASCHINENBAU = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] LOGISTIK = new String[]{
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 2 - Kurs A",
+      "Semester 2 - Kurs B",
+      "Semester 3 - Kurs A",
+      "Semester 3 - Kurs B",
+      "Semester 4 - Kurs A",
+      "Semester 4 - Kurs B",
+      "Semester 5 - Kurs A",
+      "Semester 5 - Kurs B",
+      "Semester 6 - Kurs A",
+      "Semester 6 - Kurs B"};
+  public static final String[] STEUERN = new String[]{
+      "Semester 1",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] TOURISMUS = new String[]{
+      "Semester 1",
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 2",
+      "Semester 3",
+      "Semester 4",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] VERSICHERUNG = new String[]{
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 2 - Kurs A",
+      "Semester 2 - Kurs B",
+      "Semester 3",
+      "Semester 3 - Kurs A",
+      "Semester 3 - Kurs B",
+      "Semester 4",
+      "Semester 4 - Kurs A",
+      "Semester 4 - Kurs B",
+      "Semester 5",
+      "Semester 6"};
+  public static final String[] WI = new String[]{
+      "Semester 1 - Kurs A",
+      "Semester 1 - Kurs B",
+      "Semester 1 - Kurs C",
+      "Semester 2 - Kurs A",
+      "Semester 2 - Kurs B",
+      "Semester 2 - Kurs C",
+      "Semester 3 - Kurs A",
+      "Semester 3 - Kurs B",
+      "Semester 3 - Kurs C",
+      "Semester 4 - Kurs A",
+      "Semester 4 - Kurs B",
+      "Semester 4 - Kurs C",
+      "Semester 5 - Kurs A",
+      "Semester 5 - Kurs B",
+      "Semester 5 - Kurs C",
+      "Semester 6 - Kurs A",
+      "Semester 6 - Kurs B",
+      "Semester 6 - Kurs C"};
+  public static final String[] EXTERNE = new String[]{
+      "Haupt",
+      "Jurscha",
+      "Praetel",
+      "Wagner_Ralf",
+      "Wittmuess",
+      "Wannemacher"};
+  public static final String[] LABOR = new String[]{"6B_151_153"};
+  public static final String[][] TIMETABLE_MATRIX = new String[][]{
+      BANK,
+      BAUWESEN,
+      DLM,
+      ETECHNIK,
+      FACILITYMNGT,
+      HANDEL,
+      IBA,
+      IMMOBILIEN,
+      INDUSTRIE,
+      INFO,
+      MASCHINENBAU,
+      LOGISTIK,
+      STEUERN,
+      TOURISMUS,
+      VERSICHERUNG,
+      WI,
+      EXTERNE,
+      LABOR
+  };
 }

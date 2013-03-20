@@ -15,274 +15,276 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
-
 import com.bugsense.trace.BugSenseHandler;
 import com.googlecode.androidannotations.annotations.EApplication;
-
 import de.mprengemann.hwr.timetabel.DaoMaster.DevOpenHelper;
 import de.mprengemann.hwr.timetabel.SubjectsDao.Properties;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @EApplication
 public class TimetableApplication extends Application {
 
-	public interface OnTimetableDataListener {
-		void onLoadingFinished(List<Events> result);
+  protected static final String TAG = "TimetableApplication";
+  private final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+  private OnTimetableDataListener listener;
+  private SQLiteDatabase db;
+  private DaoMaster daoMaster;
+  private DaoSession daoSession;
+  private SubjectsDao subjectsDao;
+  private EventsDao eventsDao;
+  private SharedPreferences prefs;
 
-		void onLoadingStarted();
-	}
+  public Events getEventById(long event_id) {
 
-	protected static final String TAG = "TimetableApplication";
+    if (eventsDao == null) {
+      return null;
+    }
 
-	private OnTimetableDataListener listener;
+    return eventsDao
+        .queryBuilder()
+        .where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Id
+            .eq(event_id)).list().get(0);
+  }
 
-	private final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+  public List<Events> getEvents() {
+    SimpleDateFormat df = new SimpleDateFormat("HH:mm");
 
-	private SQLiteDatabase db;
+    Calendar c = GregorianCalendar.getInstance(Locale.GERMANY);
+    long past;
+    try {
+      past = df.parse(
+          prefs.getString(getString(R.string.prefs_showInPastKey),
+              getString(R.string.prefs_default_showInPast)))
+          .getTime();
+    } catch (ParseException e) {
+      past = 1800000;
+      BugSenseHandler.sendException(e);
+    }
 
-	private DaoMaster daoMaster;
-	private DaoSession daoSession;
-	private SubjectsDao subjectsDao;
-	private EventsDao eventsDao;
+    if (eventsDao != null) {
+      return eventsDao
+          .queryBuilder()
+          .where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Start
+              .ge(c.getTimeInMillis() - past),
+              EventsDao.Properties.SubjectId
+                  .in(getVisibleSubjectsId())).orderAsc(EventsDao.Properties.Start).build().list();
+    } else {
+      return new ArrayList<Events>();
+    }
+  }
 
-	private SharedPreferences prefs;
+  public void deleteEvent(Events event) {
+    if (eventsDao != null) {
+      eventsDao.delete(event);
+    }
+  }
 
-	public Events getEventById(long event_id) {
+  public List<Events> getEvents(Long end) {
+    SimpleDateFormat df = new SimpleDateFormat("HH:mm");
 
-		if (eventsDao == null) {
-			return null;
-		}
+    long past;
+    try {
+      past = df.parse(
+          prefs.getString(getString(R.string.prefs_showInPastKey),
+              getString(R.string.prefs_default_showInPast)))
+          .getTime();
+    } catch (ParseException e) {
+      past = 1800000;
+      BugSenseHandler.sendException(e);
+    }
 
-		return eventsDao
-				.queryBuilder()
-				.where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Id
-						.eq(event_id)).list().get(0);
-	}
+    if (eventsDao != null) {
+      return eventsDao
+          .queryBuilder()
+          .where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Start
+              .ge(end - past),
+              EventsDao.Properties.SubjectId
+                  .in(getVisibleSubjectsId())).orderAsc(EventsDao.Properties.Start).build().list();
+    } else {
+      return new ArrayList<Events>();
+    }
+  }
 
-	public List<Events> getEvents() {
-		SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+  public String[] getEventsDates() {
+    if (eventsDao != null) {
+      List<Events> distEvents = new ArrayList<Events>();
 
-		Date d = new Date();
-		long past = 1800000;
-		try {
-			past = df.parse(
-					prefs.getString(getString(R.string.prefs_showInPastKey),
-							getString(R.string.prefs_default_showInPast)))
-					.getTime();
-		} catch (ParseException e) {
-			past = 1800000;
-			BugSenseHandler.sendException(e);
-		}
+      Calendar last = Calendar.getInstance();
+      last.setTime(new Date(0));
 
-		if (eventsDao != null) {
-			return eventsDao
-					.queryBuilder()
-					.where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Start
-							.ge(d.getTime() - past),
-							EventsDao.Properties.SubjectId
-									.in(getVisibleSubjectsId())).build().list();
-		} else {
-			return new ArrayList<Events>();
-		}
-	}
+      for (Events e : getEvents()) {
+        try {
+          if (isNewDistinctDate(last, e)) {
+            distEvents.add(e);
+            last.setTime(e.getStart());
+          }
+        } catch (ParseException exc) {
+          BugSenseHandler.sendException(exc);
+        }
+      }
 
-	public List<Events> getEvents(Long end) {
-		SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+      String[] distDates = new String[distEvents.size()];
+      for (int i = 0; i < distEvents.size(); i++) {
+        distDates[i] = df.format(distEvents.get(i).getStart());
+      }
 
-		long past = 1800000;
-		try {
-			past = df.parse(
-					prefs.getString(getString(R.string.prefs_showInPastKey),
-							getString(R.string.prefs_default_showInPast)))
-					.getTime();
-		} catch (ParseException e) {
-			past = 1800000;
-			BugSenseHandler.sendException(e);
-		}
+      return distDates;
+    }
 
-		if (eventsDao != null) {
-			return eventsDao
-					.queryBuilder()
-					.where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Start
-							.ge(end - past),
-							EventsDao.Properties.SubjectId
-									.in(getVisibleSubjectsId())).build().list();
-		} else {
-			return new ArrayList<Events>();
-		}
-	}
+    return null;
+  }
 
-	public String[] getEventsDates() {
-		if (eventsDao != null) {
-			List<Events> distEvents = new ArrayList<Events>();
+  public Subjects getSubjectById(long subject_id) {
 
-			Calendar last = Calendar.getInstance();
-			last.setTime(new Date(0));
+    if (subjectsDao == null) {
+      return null;
+    }
 
-			for (Events e : getEvents()) {
-				try {
-					if (isNewDistinctDate(last, e)) {
-						distEvents.add(e);
-						last.setTime(e.getStart());
-					}
-				} catch (ParseException exc) {
-					BugSenseHandler.sendException(exc);
-				}
-			}
+    return subjectsDao.queryBuilder().where(Properties.Id.eq(subject_id))
+        .list().get(0);
+  }
 
-			String[] distDates = new String[distEvents.size()];
-			for (int i = 0; i < distEvents.size(); i++) {
-				distDates[i] = df.format(distEvents.get(i).getStart());
-			}
+  public long getSubjectCount() {
+    return subjectsDao.queryBuilder().list().size();
+  }
 
-			return distDates;
-		}
+  public int getSubjectPosition(long sub_id) {
+    return getVisibleSubjects().indexOf(getSubjectById(sub_id));
+  }
 
-		return null;
-	}
+  public List<Subjects> getSubjects() {
 
-	public Subjects getSubjectById(long subject_id) {
+    if (subjectsDao == null) {
+      return new ArrayList<Subjects>();
+    }
 
-		if (subjectsDao == null) {
-			return null;
-		}
+    return subjectsDao.queryBuilder().orderAsc(Properties.ShortTitle)
+        .list();
+  }
 
-		return subjectsDao.queryBuilder().where(Properties.Id.eq(subject_id))
-				.list().get(0);
-	}
+  public List<Subjects> getVisibleSubjects() {
 
-	public long getSubjectCount() {
-		return subjectsDao.queryBuilder().list().size();
-	}
+    if (subjectsDao == null) {
+      return new ArrayList<Subjects>();
+    }
 
-	public int getSubjectPosition(long sub_id) {
-		return getVisibleSubjects().indexOf(getSubjectById(sub_id));
-	}
+    return subjectsDao.queryBuilder()
+        .where(SubjectsDao.Properties.Show.eq(Boolean.valueOf(true)))
+        .orderAsc(Properties.ShortTitle).list();
+  }
 
-	public List<Subjects> getSubjects() {
+  private List<Long> getVisibleSubjectsId() {
 
-		if (subjectsDao == null) {
-			return new ArrayList<Subjects>();
-		}
+    if (subjectsDao == null) {
+      return new ArrayList<Long>();
+    }
 
-		return subjectsDao.queryBuilder().orderAsc(Properties.ShortTitle)
-				.list();
-	}
+    List<Subjects> visibleSubjects = getVisibleSubjects();
 
-	public List<Subjects> getVisibleSubjects() {
+    List<Long> result = new ArrayList<Long>();
 
-		if (subjectsDao == null) {
-			return new ArrayList<Subjects>();
-		}
+    for (Subjects s : visibleSubjects) {
+      result.add(s.getId());
+    }
 
-		return subjectsDao.queryBuilder()
-				.where(SubjectsDao.Properties.Show.eq(Boolean.valueOf(true)))
-				.orderAsc(Properties.ShortTitle).list();
-	}
+    return result;
+  }
 
-	private List<Long> getVisibleSubjectsId() {
+  void initData() {
+    DevOpenHelper helper = new DevOpenHelper(this, "timetable-db", null);
+    db = helper.getWritableDatabase();
 
-		if (subjectsDao == null) {
-			return new ArrayList<Long>();
-		}
+    daoMaster = new DaoMaster(db);
+    daoSession = daoMaster.newSession();
+    subjectsDao = daoSession.getSubjectsDao();
+    eventsDao = daoSession.getEventsDao();
+  }
 
-		List<Subjects> visibleSubjects = getVisibleSubjects();
+  private boolean isNewDistinctDate(Calendar last, Events e)
+      throws ParseException {
 
-		List<Long> result = new ArrayList<Long>();
+    String a = df.format(last.getTime());
+    String b = df.format(e.getStart());
 
-		for (Subjects s : visibleSubjects) {
-			result.add(s.getId());
-		}
+    return df.parse(a).before(df.parse(b));
+  }
 
-		return result;
-	}
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    initData();
+  }
 
-	void initData() {
-		DevOpenHelper helper = new DevOpenHelper(this, "timetable-db", null);
-		db = helper.getWritableDatabase();
+  public void onLoadingFinished() {
+    if (listener != null) {
+      listener.onLoadingFinished(getEvents());
+    }
+  }
 
-		daoMaster = new DaoMaster(db);
-		daoSession = daoMaster.newSession();
-		subjectsDao = daoSession.getSubjectsDao();
-		eventsDao = daoSession.getEventsDao();
-	}
+  public void onLoadingStarted() {
+    if (listener != null) {
+      listener.onLoadingStarted();
+    }
+  }
 
-	private boolean isNewDistinctDate(Calendar last, Events e)
-			throws ParseException {
+  public void onNewItem(Subjects s, Events e)
+      throws SQLiteConstraintException {
+    if (subjectsDao.queryBuilder().where(Properties.Title.eq(s.getTitle()))
+        .count() == 1) {
+      s.setId(subjectsDao.queryBuilder()
+          .where(Properties.Title.eq(s.getTitle())).list().get(0)
+          .getId());
+      subjectsDao.update(s);
+    } else {
+      s.setId(subjectsDao.insert(s));
+    }
 
-		String a = df.format(last.getTime());
-		String b = df.format(e.getStart());
+    if (eventsDao
+        .queryBuilder()
+        .where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Uid
+            .eq(e.getUid())).count() == 1) {
+      e.setId(eventsDao
+          .queryBuilder()
+          .where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Uid
+              .eq(e.getUid())).list().get(0).getId());
+      e.setSubjectId(s.getId());
+      eventsDao.update(e);
+    } else {
+      e.setSubjectId(s.getId());
+      eventsDao.insert(e);
+      s.getEvents().add(e);
+      s.update();
+    }
+  }
 
-		return df.parse(a).before(df.parse(b));
-	}
+  public void removeAllData() {
+    eventsDao.deleteAll();
+    subjectsDao.deleteAll();
+  }
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		initData();
-	}
+  public void setOnTimetableDataListener(OnTimetableDataListener listener) {
+    this.listener = listener;
+  }
 
-	public void onLoadingFinished() {
-		if (listener != null) {
-			listener.onLoadingFinished(getEvents());
-		}
-	}
+  public void updateEvent(Events event) {
+    if (eventsDao != null) {
+      eventsDao.update(event);
+    }
+  }
 
-	public void onLoadingStarted() {
-		if (listener != null) {
-			listener.onLoadingStarted();
-		}
-	}
+  public interface OnTimetableDataListener {
+    void onLoadingFinished(List<Events> result);
 
-	public void onNewItem(Subjects s, Events e)
-			throws SQLiteConstraintException {
-		if (subjectsDao.queryBuilder().where(Properties.Title.eq(s.getTitle()))
-				.count() == 1) {
-			s.setId(subjectsDao.queryBuilder()
-					.where(Properties.Title.eq(s.getTitle())).list().get(0)
-					.getId());
-			subjectsDao.update(s);
-		} else {
-			s.setId(subjectsDao.insert(s));
-		}
-
-		if (eventsDao
-				.queryBuilder()
-				.where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Uid
-						.eq(e.getUid())).count() == 1) {
-			e.setId(eventsDao
-					.queryBuilder()
-					.where(de.mprengemann.hwr.timetabel.EventsDao.Properties.Uid
-							.eq(e.getUid())).list().get(0).getId());
-			e.setSubjectId(s.getId());
-			eventsDao.update(e);
-		} else {
-			e.setSubjectId(s.getId());
-			eventsDao.insert(e);
-			s.getEvents().add(e);
-			s.update();
-		}
-	}
-
-	public void removeAllData() {
-		eventsDao.deleteAll();
-		subjectsDao.deleteAll();
-	}
-
-	public void setOnTimetableDataListener(OnTimetableDataListener listener) {
-		this.listener = listener;
-	}
+    void onLoadingStarted();
+  }
 
 }

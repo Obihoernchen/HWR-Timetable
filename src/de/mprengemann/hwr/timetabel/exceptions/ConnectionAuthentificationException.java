@@ -17,26 +17,26 @@ package de.mprengemann.hwr.timetabel.exceptions;
 
 public class ConnectionAuthentificationException extends TimetableException {
 
-	private static final long serialVersionUID = -5534716321229141296L;
+  private static final long serialVersionUID = -5534716321229141296L;
 
-	public ConnectionAuthentificationException() {
-		errorType = TimetableErrorType.AUTHENTIFICATON;
-	}
+  public ConnectionAuthentificationException() {
+    errorType = TimetableErrorType.AUTHENTIFICATON;
+  }
 
-	public ConnectionAuthentificationException(String detailMessage) {
-		super(detailMessage);
-		errorType = TimetableErrorType.AUTHENTIFICATON;
-	}
+  public ConnectionAuthentificationException(String detailMessage) {
+    super(detailMessage);
+    errorType = TimetableErrorType.AUTHENTIFICATON;
+  }
 
-	public ConnectionAuthentificationException(Throwable throwable) {
-		super(throwable);
-		errorType = TimetableErrorType.AUTHENTIFICATON;
-	}
+  public ConnectionAuthentificationException(Throwable throwable) {
+    super(throwable);
+    errorType = TimetableErrorType.AUTHENTIFICATON;
+  }
 
-	public ConnectionAuthentificationException(String detailMessage,
-			Throwable throwable) {
-		super(detailMessage, throwable);
-		errorType = TimetableErrorType.AUTHENTIFICATON;
-	}
+  public ConnectionAuthentificationException(String detailMessage,
+                                             Throwable throwable) {
+    super(detailMessage, throwable);
+    errorType = TimetableErrorType.AUTHENTIFICATON;
+  }
 
 }

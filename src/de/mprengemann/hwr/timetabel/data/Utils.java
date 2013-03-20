@@ -15,112 +15,110 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel.data;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-import com.bugsense.trace.BugSenseHandler;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import de.mprengemann.hwr.timetabel.R;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 public class Utils {
 
-	@SuppressWarnings("unused")
-	private static final String TAG = "Utils";
+  @SuppressWarnings("unused")
+  private static final String TAG = "Utils";
 
-	private static final int CASE_KURS = 0;
-	private static final int CASE_KURS_A = 1;
-	private static final int CASE_KURS_B = 2;
-	private static final int CASE_KURS_C = 3;
+  private static final int CASE_KURS = 0;
+  private static final int CASE_KURS_A = 1;
+  private static final int CASE_KURS_B = 2;
+  private static final int CASE_KURS_C = 3;
 
-	public static String buildURL(Context context, SharedPreferences preferences){
-		int fachrichtung = Integer.parseInt(preferences.getString(
-				context.getString(R.string.prefs_fachrichtungKey), "0"));
-		int course = Integer.parseInt(preferences.getString(
-				context.getString(R.string.prefs_semester_kurs_key), "0"));
-		
-		return "http://ipool.ba-berlin.de/stundenplaene.anzeige.php?faculty="
-				+ fachrichtung + "&course=" + course + "&type=ics";
-	}
-	
-	public static int getCourseFromOldPrefs(Context context, SharedPreferences preferences) {
-		int fachrichtung = Integer.parseInt(preferences.getString(
-				context.getString(R.string.prefs_fachrichtungKey), "1"));
-		int semester = Integer.parseInt(preferences.getString(
-				context.getString(R.string.prefs_semesterKey), "1"));
-		int kurs = Integer.parseInt(preferences.getString(
-				context.getString(R.string.prefs_kursKey), "1"));
+  public static String buildURL(Context context, SharedPreferences preferences) {
+    int fachrichtung = Integer.parseInt(preferences.getString(
+        context.getString(R.string.prefs_fachrichtungKey), "0"));
+    int course = Integer.parseInt(preferences.getString(
+        context.getString(R.string.prefs_semester_kurs_key), "0"));
 
-		int course = 0;
+    return "http://ipool.ba-berlin.de/stundenplaene.anzeige.php?faculty="
+        + fachrichtung + "&course=" + course + "&type=ics";
+  }
 
-		switch (kurs) {
-		case CASE_KURS:
-			// Versicherung
-			if (fachrichtung == 14) {
-				course = semester + 1;
-				// Tourismus
-			} else if (fachrichtung == 13) {
-				if (semester > 1) {
-					course = semester + 1;
-				} else {
-					course = semester - 1;
-				}
-			} else {
-				course = semester - 1;
-			}
+  public static int getCourseFromOldPrefs(Context context, SharedPreferences preferences) {
+    int fachrichtung = Integer.parseInt(preferences.getString(
+        context.getString(R.string.prefs_fachrichtungKey), "1"));
+    int semester = Integer.parseInt(preferences.getString(
+        context.getString(R.string.prefs_semesterKey), "1"));
+    int kurs = Integer.parseInt(preferences.getString(
+        context.getString(R.string.prefs_kursKey), "1"));
 
-			break;
-		case CASE_KURS_A:
-			// Spedition/Logistik oder Versicherung
-			if ((fachrichtung == 11) || (fachrichtung == 14)) {
-				course = (semester - 1) * 2;
-			} else if (fachrichtung == 13) {
-				course = (semester - 1) * 2 + 1;
-			} else {
-				course = (semester - 1) * 3;
-			}
-			break;
-		case CASE_KURS_B:
-			// Spedition/Logistik oder Versicherung
-			if ((fachrichtung == 11) || (fachrichtung == 14)) {
-				course = (semester - 1) * 2 + 1;
-			} else if (fachrichtung == 13) {
-				course = (semester - 1) * 3 + 2;
-			} else {
-				course = (semester - 1) * 3 + 1;
-			}
-			break;
-		case CASE_KURS_C:
-			course = (semester - 1) * 3 + 2;
-			break;
-		}
+    int course = 0;
 
-		return course;
-	}
+    switch (kurs) {
+      case CASE_KURS:
+        // Versicherung
+        if (fachrichtung == 14) {
+          course = semester + 1;
+          // Tourismus
+        } else if (fachrichtung == 13) {
+          if (semester > 1) {
+            course = semester + 1;
+          } else {
+            course = semester - 1;
+          }
+        } else {
+          course = semester - 1;
+        }
 
-	public static boolean connectionChecker(Context context) {
-		ConnectivityManager connec = (ConnectivityManager) context
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		boolean connected = false;
-		try {
-			connected = connec.getActiveNetworkInfo().isConnected();
-		} catch (Exception e) {
-			connected = false;
-		}
+        break;
+      case CASE_KURS_A:
+        // Spedition/Logistik oder Versicherung
+        if ((fachrichtung == 11) || (fachrichtung == 14)) {
+          course = (semester - 1) * 2;
+        } else if (fachrichtung == 13) {
+          course = (semester - 1) * 2 + 1;
+        } else {
+          course = (semester - 1) * 3;
+        }
+        break;
+      case CASE_KURS_B:
+        // Spedition/Logistik oder Versicherung
+        if ((fachrichtung == 11) || (fachrichtung == 14)) {
+          course = (semester - 1) * 2 + 1;
+        } else if (fachrichtung == 13) {
+          course = (semester - 1) * 3 + 2;
+        } else {
+          course = (semester - 1) * 3 + 1;
+        }
+        break;
+      case CASE_KURS_C:
+        course = (semester - 1) * 3 + 2;
+        break;
+    }
 
-		return connected;
-	}
+    return course;
+  }
 
-	public static boolean shouldCheckForDate(long last) {
-		Calendar calendar = GregorianCalendar.getInstance();
+  public static boolean connectionChecker(Context context) {
+    ConnectivityManager connec = (ConnectivityManager) context
+        .getSystemService(Context.CONNECTIVITY_SERVICE);
+    boolean connected = false;
+    try {
+      connected = connec.getActiveNetworkInfo().isConnected();
+    } catch (Exception e) {
+      connected = false;
+    }
 
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
+    return connected;
+  }
 
-		return (last < calendar.getTimeInMillis());
-	}
+  public static boolean shouldCheckForDate(long last) {
+    Calendar calendar = GregorianCalendar.getInstance();
+
+    calendar.set(Calendar.HOUR_OF_DAY, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    calendar.set(Calendar.MILLISECOND, 0);
+
+    return (last < calendar.getTimeInMillis());
+  }
 }

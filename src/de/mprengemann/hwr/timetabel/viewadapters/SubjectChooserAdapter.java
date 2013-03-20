@@ -15,13 +15,6 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel.viewadapters;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.bugsense.trace.BugSenseHandler;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,122 +23,127 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
+import com.bugsense.trace.BugSenseHandler;
 import de.mprengemann.hwr.timetabel.R;
 import de.mprengemann.hwr.timetabel.Subjects;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 public class SubjectChooserAdapter extends BaseAdapter {
 
-	public interface OnSubjectCheckedChangeListener {
-		void onCheckedChange(Long id, Boolean isChecked);
-	}
+  public interface OnSubjectCheckedChangeListener {
+    void onCheckedChange(Long id, Boolean isChecked);
+  }
 
-	static class ViewHolder {
-		CheckedTextView checkView;
-	}
+  static class ViewHolder {
+    CheckedTextView checkView;
+  }
 
-	private static final String TAG = "SubjectChooserAdapter";
+  private static final String TAG = "SubjectChooserAdapter";
 
-	private List<Long> changed = new ArrayList<Long>();
+  private List<Long> changed = new ArrayList<Long>();
 
-	private LayoutInflater mInflater;
+  private LayoutInflater mInflater;
 
-	private List<Subjects> mData = new ArrayList<Subjects>();
+  private List<Subjects> mData = new ArrayList<Subjects>();
 
-	private OnSubjectCheckedChangeListener listener;
+  private OnSubjectCheckedChangeListener listener;
 
-	public SubjectChooserAdapter(Context context) {
-		mInflater = LayoutInflater.from(context);
-	}
+  public SubjectChooserAdapter(Context context) {
+    mInflater = LayoutInflater.from(context);
+  }
 
-	@Override
-	public int getCount() {
-		return mData.size();
-	}
+  @Override
+  public int getCount() {
+    return mData.size();
+  }
 
-	@Override
-	public Subjects getItem(int position) {
-		return mData.get(Integer.valueOf(position));
-	}
+  @Override
+  public Subjects getItem(int position) {
+    return mData.get(Integer.valueOf(position));
+  }
 
-	@Override
-	public long getItemId(int position) {
-		return getItem(position).getId().longValue();
-	}
+  @Override
+  public long getItemId(int position) {
+    return getItem(position).getId().longValue();
+  }
 
-	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
-		ViewHolder holder;
-		if (convertView == null) {
-			holder = new ViewHolder();
-			convertView = mInflater.inflate(
-					R.layout.fragment_subject_chooser_item, null);
-			holder.checkView = (CheckedTextView) convertView
-					.findViewById(R.id.checkedText_subject_chooser);
-			convertView.setTag(holder);
-		} else {
-			holder = (ViewHolder) convertView.getTag();
-		}
+  @Override
+  public View getView(final int position, View convertView, ViewGroup parent) {
+    ViewHolder holder;
+    if (convertView == null) {
+      holder = new ViewHolder();
+      convertView = mInflater.inflate(
+          R.layout.fragment_subject_chooser_item, null);
+      holder.checkView = (CheckedTextView) convertView
+          .findViewById(R.id.checkedText_subject_chooser);
+      convertView.setTag(holder);
+    } else {
+      holder = (ViewHolder) convertView.getTag();
+    }
 
-		final Subjects item = mData.get(position);
+    final Subjects item = mData.get(position);
 
-		if (item != null) {
-			try {
-				holder.checkView.setText(item.getTitle());
-			} catch (Exception e) {
-				Log.e(TAG, String.valueOf(item.getId()));
-				HashMap<String, String> extraData = new HashMap<String, String>();
-				extraData.put("itemid", String.valueOf(item.getId()));
+    if (item != null) {
+      try {
+        holder.checkView.setText(item.getTitle());
+      } catch (Exception e) {
+        Log.e(TAG, String.valueOf(item.getId()));
+        HashMap<String, String> extraData = new HashMap<String, String>();
+        extraData.put("itemid", String.valueOf(item.getId()));
 
-				BugSenseHandler.sendExceptionMap(extraData, e);
-			}
+        BugSenseHandler.sendExceptionMap(extraData, e);
+      }
 
-			if (changed.contains(Long.valueOf(item.getId()))) {
-				holder.checkView.setChecked(!item.getShow().booleanValue());
-			} else {
-				holder.checkView.setChecked(item.getShow().booleanValue());
-			}
+      if (changed.contains(Long.valueOf(item.getId()))) {
+        holder.checkView.setChecked(!item.getShow().booleanValue());
+      } else {
+        holder.checkView.setChecked(item.getShow().booleanValue());
+      }
 
-			holder.checkView.setOnClickListener(new OnClickListener() {
+      holder.checkView.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View v) {
-					if (changed.contains(Long.valueOf(item.getId()))) {
-						((CheckedTextView) v).setChecked(item.getShow()
-								.booleanValue());
-						changed.remove(Long.valueOf(item.getId()));
-					} else {
-						((CheckedTextView) v).setChecked(!item.getShow()
-								.booleanValue());
-						changed.add(Long.valueOf(item.getId()));
-					}
+        @Override
+        public void onClick(View v) {
+          if (changed.contains(Long.valueOf(item.getId()))) {
+            ((CheckedTextView) v).setChecked(item.getShow()
+                .booleanValue());
+            changed.remove(Long.valueOf(item.getId()));
+          } else {
+            ((CheckedTextView) v).setChecked(!item.getShow()
+                .booleanValue());
+            changed.add(Long.valueOf(item.getId()));
+          }
 
-					if (listener != null) {
-						listener.onCheckedChange(getItemId(position), Boolean
-								.valueOf(((CheckedTextView) v).isChecked()));
-					}
-				}
-			});
-		}
+          if (listener != null) {
+            listener.onCheckedChange(getItemId(position), Boolean
+                .valueOf(((CheckedTextView) v).isChecked()));
+          }
+        }
+      });
+    }
 
-		return convertView;
-	}
+    return convertView;
+  }
 
-	public void setItems(List<Subjects> subjects) {
-		if (mData == null) {
-			mData = new ArrayList<Subjects>();
-		}
+  public void setItems(List<Subjects> subjects) {
+    if (mData == null) {
+      mData = new ArrayList<Subjects>();
+    }
 
-		mData.clear();
+    mData.clear();
 
-		for (Subjects s : subjects) {
-			mData.add(s);
-		}
+    for (Subjects s : subjects) {
+      mData.add(s);
+    }
 
-		notifyDataSetChanged();
-	}
+    notifyDataSetChanged();
+  }
 
-	public void setOnSubjectCheckedChangeListener(
-			OnSubjectCheckedChangeListener listener) {
-		this.listener = listener;
-	}
+  public void setOnSubjectCheckedChangeListener(
+      OnSubjectCheckedChangeListener listener) {
+    this.listener = listener;
+  }
 }

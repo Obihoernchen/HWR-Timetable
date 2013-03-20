@@ -32,110 +32,110 @@ import de.mprengemann.hwr.timetabel.viewadapters.CalendarChooserAdapter.OnCalend
 
 public class CalendarChooserDialog extends AlertDialog.Builder {
 
-	public interface OnSelectionListener {
-		void onSelect(GoogleCalendar cal);
-	}
+  public interface OnSelectionListener {
+    void onSelect(GoogleCalendar cal);
+  }
 
-	private static final String TAG = "CalendarChooserDialog";
+  private static final String TAG = "CalendarChooserDialog";
 
-	private OnSelectionListener listener;
+  private OnSelectionListener listener;
 
-	private ListView list;
-	private Handler mHandler = new Handler();
+  private ListView list;
+  private Handler mHandler = new Handler();
 
-	private GoogleCalendar selected;
-	private CalendarChooserAdapter mAdapter;
+  private GoogleCalendar selected;
+  private CalendarChooserAdapter mAdapter;
 
-	private Context context;
+  private Context context;
 
-	public CalendarChooserDialog(Context c) {
-		this(c, -1);
-	}
+  public CalendarChooserDialog(Context c) {
+    this(c, -1);
+  }
 
-	public CalendarChooserDialog(Context c, long sel_id) {
-		super(c);
-		this.context = c;
+  public CalendarChooserDialog(Context c, long sel_id) {
+    super(c);
+    this.context = c;
 
-		Log.i(TAG, "Selected_id: " + sel_id);
+    Log.i(TAG, "Selected_id: " + sel_id);
 
-		initViews();
+    initViews();
 
-		if (sel_id > -1) {
-			CalendarUtils.getGoogleCalendar(c, sel_id,
-					new CalendarFetcherListener() {
+    if (sel_id > -1) {
+      CalendarUtils.getGoogleCalendar(c, sel_id,
+          new CalendarFetcherListener() {
 
-						@Override
-						public void newCalendar(final GoogleCalendar cal) {
-							selected = cal;
+            @Override
+            public void newCalendar(final GoogleCalendar cal) {
+              selected = cal;
 
-							mHandler.post(new Runnable() {
+              mHandler.post(new Runnable() {
 
-								@Override
-								public void run() {
-									mAdapter.setSelection(cal);
-								}
+                @Override
+                public void run() {
+                  mAdapter.setSelection(cal);
+                }
 
-							});
-						}
-					});
-		}
-	}
+              });
+            }
+          });
+    }
+  }
 
-	void initViews() {
-		setTitle(R.string.text_calendar_chooser_title);
-		View v = LayoutInflater.from(context).inflate(
-				R.layout.dialog_calendar_chooser, null);
-		list = (ListView) v.findViewById(R.id.list_calendar_chooser);
-		mAdapter = new CalendarChooserAdapter(context);
-		list.setAdapter(mAdapter);
+  void initViews() {
+    setTitle(R.string.text_calendar_chooser_title);
+    View v = LayoutInflater.from(context).inflate(
+        R.layout.dialog_calendar_chooser, null);
+    list = (ListView) v.findViewById(R.id.list_calendar_chooser);
+    mAdapter = new CalendarChooserAdapter(context);
+    list.setAdapter(mAdapter);
 
-		setView(v);
-		setPositiveButton(android.R.string.ok, new OnClickListener() {
+    setView(v);
+    setPositiveButton(android.R.string.ok, new OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				if (listener != null) {
-					listener.onSelect(selected);
-				}
-				dialog.dismiss();
-			}
-		});
-		setNegativeButton(android.R.string.cancel, new OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        if (listener != null) {
+          listener.onSelect(selected);
+        }
+        dialog.dismiss();
+      }
+    });
+    setNegativeButton(android.R.string.cancel, new OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				selected = null;
-				dialog.dismiss();
-			}
-		});
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        selected = null;
+        dialog.dismiss();
+      }
+    });
 
-		CalendarUtils.getGoogleCalendars(context,
-				new CalendarFetcherListener() {
+    CalendarUtils.getGoogleCalendars(context,
+        new CalendarFetcherListener() {
 
-					@Override
-					public void newCalendar(final GoogleCalendar cal) {
-						mHandler.post(new Runnable() {
+          @Override
+          public void newCalendar(final GoogleCalendar cal) {
+            mHandler.post(new Runnable() {
 
-							@Override
-							public void run() {
-								mAdapter.addItem(cal);
-							}
-						});
-					}
-				});
+              @Override
+              public void run() {
+                mAdapter.addItem(cal);
+              }
+            });
+          }
+        });
 
-		mAdapter.setOnCalendarSelectedListener(new OnCalendarSelectedListener() {
+    mAdapter.setOnCalendarSelectedListener(new OnCalendarSelectedListener() {
 
-			@Override
-			public void onCalendarSelected(GoogleCalendar cal) {
-				selected = cal;
-			}
+      @Override
+      public void onCalendarSelected(GoogleCalendar cal) {
+        selected = cal;
+      }
 
-		});
-	}
+    });
+  }
 
-	public void setOnSelectionListener(OnSelectionListener listener) {
-		this.listener = listener;
-	}
+  public void setOnSelectionListener(OnSelectionListener listener) {
+    this.listener = listener;
+  }
 
 }

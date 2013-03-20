@@ -15,191 +15,270 @@
  *******************************************************************************/
 package de.mprengemann.hwr.timetabel.fragments;
 
-import java.util.List;
-
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
-import com.googlecode.androidannotations.annotations.AfterViews;
-import com.googlecode.androidannotations.annotations.App;
-import com.googlecode.androidannotations.annotations.EFragment;
-import com.googlecode.androidannotations.annotations.ViewById;
-
+import com.googlecode.androidannotations.annotations.*;
 import de.mprengemann.hwr.timetabel.Events;
 import de.mprengemann.hwr.timetabel.R;
+import de.mprengemann.hwr.timetabel.TimetableActivity;
 import de.mprengemann.hwr.timetabel.TimetableApplication;
 import de.mprengemann.hwr.timetabel.TimetableApplication.OnTimetableDataListener;
 import de.mprengemann.hwr.timetabel.viewadapters.SubjectsAdapter;
 import de.mprengemann.hwr.timetabel.viewadapters.SubjectsAdapter.OnDataChangeListener;
 
+import java.util.List;
+
 @EFragment(R.layout.fragment_subject_list)
 public class SubjectListFragment extends SherlockFragment {
 
-	public interface OnItemClickListener {
-		public void onClick(long subject_id, long event_id);
+  private static final String TAG = "SubjectListFragment";
+  @ViewById(R.id.list_subjects)
+  ListView listView;
+  @ViewById(R.id.text_subjects_empty)
+  TextView empty;
+  @App
+  TimetableApplication application;
+  private SubjectsAdapter mAdapter;
+  private OnItemClickListener onItemClickListener;
+  private MenuItem menuItemToShow;
+  private ActionMode actionMode;
+  private TimetableActionMode mTimetableActionModeCallback;
 
-		public boolean onLongClick(long subject_id, long event_id);
-	}
+  public static SubjectListFragment_ newInstance() {
+    SubjectListFragment_ f = new SubjectListFragment_();
+    return f;
+  }
 
-	private static final String TAG = "SubjectListFragment";
+  public void addItem(Events e) {
+    if (mAdapter != null) {
+      mAdapter.addItem(e);
+    }
+  }
 
-	public static SubjectListFragment_ newInstance() {
-		SubjectListFragment_ f = new SubjectListFragment_();
-		return f;
-	}
+  public void addSeparatorItem(String str) {
+    if (mAdapter != null) {
+      mAdapter.addSeparatorItem(str);
+    }
+  }
 
-	@ViewById(R.id.list_subjects)
-	ListView listView;
-	@ViewById(R.id.text_subjects_empty)
-	TextView empty;
+  public void clear() {
+    if (mAdapter != null) {
+      mAdapter.clear();
+    }
+  }
 
-	@App
-	TimetableApplication application;
-	private SubjectsAdapter mAdapter;
-	private OnItemClickListener onItemClickListener;
+  public void fillList() {
+    mAdapter.setItems(application.getEvents());
+  }
 
-	private MenuItem menuItemToShow;
+  @AfterViews
+  public void initViews() {
+    setHasOptionsMenu(true);
+    listView.setFastScrollEnabled(true);
 
-	public void addItem(Events e) {
-		if (mAdapter != null) {
-			mAdapter.addItem(e);
-		}
-	}
+    mAdapter = new SubjectsAdapter(getActivity(), application);
+    mAdapter.setOnDataChangeListener(new OnDataChangeListener() {
 
-	public void addSeparatorItem(String str) {
-		if (mAdapter != null) {
-			mAdapter.addSeparatorItem(str);
-		}
-	}
+      @Override
+      public void onDataChange(int size, final String text) {
+        if (size == 0) {
+          empty.setVisibility(View.VISIBLE);
+          empty.post(new Runnable() {
 
-	public void clear() {
-		if (mAdapter != null) {
-			mAdapter.clear();
-		}
-	}
+            @Override
+            public void run() {
+              empty.setText(text);
+            }
 
-	public void fillList() {
-		mAdapter.setItems(application.getEvents());
-	}
+          });
+        } else {
+          empty.setVisibility(View.GONE);
+        }
+      }
 
-	@AfterViews
-	public void initViews() {
-		mAdapter = new SubjectsAdapter(getActivity(), application);
-		mAdapter.setOnDataChangeListener(new OnDataChangeListener() {
+    });
 
-			@Override
-			public void onDataChange(int size, final String text) {
-				if (size == 0) {
-					empty.setVisibility(View.VISIBLE);
-					empty.post(new Runnable() {
+    application.setOnTimetableDataListener(new OnTimetableDataListener() {
 
-						@Override
-						public void run() {
-							empty.setText(text);
-						}
+      @Override
+      public void onLoadingFinished(final List<Events> result) {
+        Log.i(TAG, "End!!");
 
-					});
-				} else {
-					empty.setVisibility(View.GONE);
-				}
-			}
+        mAdapter.setLoading(false);
+        mAdapter.setItems(result);
+        if (menuItemToShow != null) {
+          menuItemToShow.setVisible(true);
+        }
 
-		});
+        getSherlockActivity()
+            .setSupportProgressBarIndeterminateVisibility(false);
+      }
 
-		application.setOnTimetableDataListener(new OnTimetableDataListener() {
+      @Override
+      public void onLoadingStarted() {
+        Log.i(TAG, "Start!!");
 
-			@Override
-			public void onLoadingFinished(final List<Events> result) {
-				Log.i(TAG, "End!!");
+        mAdapter.setLoading(true);
 
-				mAdapter.setLoading(false);
-				mAdapter.setItems(result);
-				if (menuItemToShow != null) {
-					menuItemToShow.setVisible(true);
-				}
+        if (getSherlockActivity() != null) {
+          getSherlockActivity()
+              .setSupportProgressBarIndeterminateVisibility(true);
+          getSherlockActivity().setSupportProgress(
+              Window.PROGRESS_END);
+        }
+      }
 
-				getSherlockActivity()
-						.setSupportProgressBarIndeterminateVisibility(false);
-			}
+    });
 
-			@Override
-			public void onLoadingStarted() {
-				Log.i(TAG, "Start!!");
+    listView.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+    listView.setAdapter(mAdapter);
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view,
+                              int position, long id) {
+        if (mAdapter.getItem(position) != null) {
+          if (actionMode != null) {
+            mTimetableActionModeCallback.setSelected(mAdapter.getItem(position));
+            mAdapter.setSelection(mAdapter.getItem(position));
+            return;
+          }
+        }
 
-				mAdapter.setLoading(true);
+        if (onItemClickListener != null) {
+          if (mAdapter.getItem(position) != null) {
+            onItemClickListener.onClick(view, mAdapter.getItem(position)
+                .getSubjectId(), mAdapter.getItem(position)
+                .getId());
+          }
 
-				if (getSherlockActivity() != null) {
-					getSherlockActivity()
-							.setSupportProgressBarIndeterminateVisibility(true);
-					getSherlockActivity().setSupportProgress(
-							Window.PROGRESS_END);
-				}
-			}
+        }
+      }
+    });
+    listView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
-		});
+      @Override
+      public boolean onItemLongClick(AdapterView<?> parent, View view,
+                                     int position, long id) {
+        if (mAdapter.getItem(position) != null) {
+          if (actionMode != null) {
+            mAdapter.setSelection(mAdapter.getItem(position));
+            return true;
+          }
+          mTimetableActionModeCallback = new TimetableActionMode();
+          mTimetableActionModeCallback.setSelected(mAdapter.getItem(position));
+          actionMode = getSherlockActivity().startActionMode(mTimetableActionModeCallback);
+          listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+          mAdapter.setSelection(mAdapter.getItem(position));
+        }
 
-		listView.setAdapter(mAdapter);
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        if (onItemClickListener != null) {
+          if (mAdapter.getItem(position) != null) {
+            return onItemClickListener.onLongClick(view, mAdapter
+                .getItem(position).getSubjectId(), mAdapter
+                .getItem(position).getId());
+          }
+        }
+        return false;
+      }
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (onItemClickListener != null) {
-					if (mAdapter.getItem(position) != null) {
-						onItemClickListener.onClick(mAdapter.getItem(position)
-								.getSubjectId(), mAdapter.getItem(position)
-								.getId());
-					}
+    });
 
-				}
-			}
-		});
-		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
+    fillList();
+  }
 
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (onItemClickListener != null) {
-					if (mAdapter.getItem(position) != null) {
-						return onItemClickListener.onLongClick(mAdapter
-								.getItem(position).getSubjectId(), mAdapter
-								.getItem(position).getId());
-					}
-				}
-				return false;
-			}
+  public void scrollTo(String item) {
+    if (mAdapter != null) {
+      if (listView != null) {
+        listView.setSelection(mAdapter.getSeparatorPosition(item));
+      }
+    }
+  }
 
-		});
+  public void setInitalState() {
+    clear();
+    empty.setVisibility(View.VISIBLE);
+    empty.setText(R.string.text_no_subjects);
+  }
 
-		fillList();
-	}
+  public void setOnItemClickListener(OnItemClickListener listener) {
+    this.onItemClickListener = listener;
+  }
 
-	public void scrollTo(String item) {
-		if (mAdapter != null) {
-			if (listView != null) {
-				listView.setSelection(mAdapter.getSeparatorPosition(item));
-			}
-		}
-	}
+  public void showAfter(final MenuItem item) {
+    this.menuItemToShow = item;
+  }
 
-	public void setInitalState() {
-		clear();
-		empty.setVisibility(View.VISIBLE);
-		empty.setText(R.string.text_no_subjects);
-	}
+  @UiThread
+  private void showEditDialog(long id) {
+    FragmentTransaction ft = getFragmentManager().beginTransaction();
+    Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+    if (prev != null) {
+      ft.remove(prev);
+    }
+    ft.addToBackStack(null);
 
-	public void setOnItemClickListener(OnItemClickListener listener) {
-		this.onItemClickListener = listener;
-	}
+    EventEditDialogFragment newFragment = EventEditDialogFragment.newInstance(id);
+    newFragment.show(ft, "dialog");
+  }
 
-	public void showAfter(final MenuItem item) {
-		this.menuItemToShow = item;
-	}
+  public interface OnItemClickListener {
+    public void onClick(View v, long subject_id, long event_id);
+
+    public boolean onLongClick(View v, long subject_id, long event_id);
+  }
+
+  private class TimetableActionMode implements ActionMode.Callback {
+    private Events event;
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+      getSherlockActivity().getSupportMenuInflater().inflate(R.menu.action_mode, menu);
+      return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+      return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+      switch (item.getItemId()) {
+        case R.id.action_mode_edit:
+          showEditDialog(event.getId());
+          break;
+        case R.id.action_mode_delete:
+          application.deleteEvent(event);
+          if (getActivity() instanceof TimetableActivity) {
+            ((TimetableActivity) getActivity()).updateList();
+          }
+          break;
+      }
+      mode.finish();
+      return true;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+      actionMode = null;
+      listView.setChoiceMode(AbsListView.CHOICE_MODE_NONE);
+      mAdapter.setSelection(null);
+    }
+
+    public void setSelected(Events event) {
+      this.event = event;
+    }
+  }
 }
