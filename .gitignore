@@ -15,6 +15,7 @@
 bin/
 gen/
 aa-gen/
+out/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -26,3 +27,5 @@ local.properties
 
 # IntelliJ project files
 .idea
+
+Publishing/Releases/.DS_Store
